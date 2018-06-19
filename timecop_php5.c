@@ -1508,12 +1508,18 @@ static void _timecop_date_create_from_format(INTERNAL_FUNCTION_PARAMETERS, int i
 		RETURN_FALSE;
 	}
 
+	if (immutable) {
+		real_func = ORIG_FUNC_NAME("date_create_immutable_from_format");
+	} else {
+		real_func = ORIG_FUNC_NAME("date_create_from_format");
+	}
+
 	INIT_ZVAL(orig_format);
 	ZVAL_STRINGL(&orig_format, orig_format_str, orig_format_len, 0);
 	INIT_ZVAL(orig_time);
 	ZVAL_STRINGL(&orig_time, orig_time_str, orig_time_len, 0);
 
-	call_php_function_with_3_params(ORIG_FUNC_NAME("date_create_from_format"), &dt, &orig_format, &orig_time, orig_timezone);
+	call_php_function_with_3_params(real_func, &dt, &orig_format, &orig_time, orig_timezone);
 	if (Z_TYPE_P(dt) == IS_BOOL && !Z_BVAL_P(dt)) {
 		RETURN_FALSE;
 	}
@@ -1527,12 +1533,19 @@ static void _timecop_date_create_from_format(INTERNAL_FUNCTION_PARAMETERS, int i
 
 	INIT_ZVAL(now_timestamp);
 	ZVAL_LONG(&now_timestamp, now.sec);
-	call_php_method_with_1_params(&dt, TIMECOP_G(ce_DateTime), "settimestamp", NULL, &now_timestamp);
+	if (immutable) {
+		call_php_method_with_1_params(&dt, TIMECOP_G(ce_DateTimeImmutable), "settimestamp", &dt, &now_timestamp);
+	} else {
+		call_php_method_with_1_params(&dt, TIMECOP_G(ce_DateTime), "settimestamp", &dt, &now_timestamp);
+	}
 	sprintf(buf, "Y-m-d H:i:s.%06ld ", now.usec);
 	INIT_ZVAL(tmp);
 	ZVAL_STRINGL(&tmp, buf, strlen(buf), 0);
-	call_php_method_with_1_params(&dt, TIMECOP_G(ce_DateTime), "format", &fixed_time, &tmp);
-
+	if (immutable) {
+		call_php_method_with_1_params(&dt, TIMECOP_G(ce_DateTimeImmutable), "format", &fixed_time, &tmp);
+	} else {
+		call_php_method_with_1_params(&dt, TIMECOP_G(ce_DateTime), "format", &fixed_time, &tmp);
+	}
 	INIT_ZVAL(fixed_format);
 	if (memchr(orig_format_str, 'g', orig_format_len) ||
 		memchr(orig_format_str, 'h', orig_format_len) ||
@@ -1561,11 +1574,6 @@ static void _timecop_date_create_from_format(INTERNAL_FUNCTION_PARAMETERS, int i
 	call_php_function_with_3_params("sprintf", &new_format, &tmp, &fixed_format, &orig_format);
 	call_php_function_with_3_params("sprintf", &new_time, &tmp, fixed_time, &orig_time);
 
-	if (immutable) {
-		real_func = ORIG_FUNC_NAME("date_create_immutable_from_format");
-	} else {
-		real_func = ORIG_FUNC_NAME("date_create_from_format");
-	}
 	call_php_function_with_3_params(real_func, &new_dt, new_format, new_time, orig_timezone);
 
 	zval_ptr_dtor(&dt);

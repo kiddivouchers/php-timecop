@@ -1428,10 +1428,16 @@ static void _timecop_date_create_from_format(INTERNAL_FUNCTION_PARAMETERS, int i
 		RETURN_FALSE;
 	}
 
+	if (immutable) {
+		real_func = ORIG_FUNC_NAME("date_create_immutable_from_format");
+	} else {
+		real_func = ORIG_FUNC_NAME("date_create_from_format");
+	}
+
 	ZVAL_STRINGL(&orig_format, orig_format_str, orig_format_len);
 	ZVAL_STRINGL(&orig_time, orig_time_str, orig_time_len);
 
-	call_php_function_with_3_params(ORIG_FUNC_NAME("date_create_from_format"), &dt, &orig_format, &orig_time, orig_timezone);
+	call_php_function_with_3_params(real_func, &dt, &orig_format, &orig_time, orig_timezone);
 	if (Z_TYPE(dt) == IS_FALSE) {
 		RETURN_FALSE;
 	}
@@ -1446,10 +1452,18 @@ static void _timecop_date_create_from_format(INTERNAL_FUNCTION_PARAMETERS, int i
 	get_mock_timeval(&now, NULL);
 
 	ZVAL_LONG(&now_timestamp, now.sec);
-	call_php_method_with_1_params(&dt, TIMECOP_G(ce_DateTime), "settimestamp", NULL, &now_timestamp);
+	if (immutable) {
+		call_php_method_with_1_params(&dt, TIMECOP_G(ce_DateTimeImmutable), "settimestamp", &dt, &now_timestamp);
+	} else {
+		call_php_method_with_1_params(&dt, TIMECOP_G(ce_DateTime), "settimestamp", &dt, &now_timestamp);
+	}
 	sprintf(buf, "Y-m-d H:i:s.%06ld ", now.usec);
 	ZVAL_STRING(&tmp, buf);
-	call_php_method_with_1_params(&dt, TIMECOP_G(ce_DateTime), "format", &fixed_time, &tmp);
+	if (immutable) {
+		call_php_method_with_1_params(&dt, TIMECOP_G(ce_DateTimeImmutable), "format", &fixed_time, &tmp);
+	} else {
+		call_php_method_with_1_params(&dt, TIMECOP_G(ce_DateTime), "format", &fixed_time, &tmp);
+	}
 	zval_ptr_dtor(&tmp);
 
 	if (memchr(orig_format_str, 'g', orig_format_len) ||
@@ -1484,11 +1498,6 @@ static void _timecop_date_create_from_format(INTERNAL_FUNCTION_PARAMETERS, int i
 	call_php_function_with_3_params("sprintf", &new_time, &tmp, &fixed_time, &orig_time);
 	zval_ptr_dtor(&tmp);
 
-	if (immutable) {
-		real_func = ORIG_FUNC_NAME("date_create_immutable_from_format");
-	} else {
-		real_func = ORIG_FUNC_NAME("date_create_from_format");
-	}
 	call_php_function_with_3_params(real_func, return_value, &new_format, &new_time, orig_timezone);
 
 	zval_ptr_dtor(&dt);
