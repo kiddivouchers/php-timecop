@@ -803,21 +803,10 @@ static int get_formatted_mock_time(zval *time, zval *timezone_obj, zval *retval_
 
 	get_mock_timeval(&now, NULL);
 
-	if (timezone_obj && Z_TYPE_P(timezone_obj) == IS_OBJECT) {
-		zval zonename;
-		call_php_method_with_0_params(timezone_obj, Z_OBJCE_P(timezone_obj), "getname", &zonename);
-		call_php_function_with_0_params("date_default_timezone_get", &orig_zonename);
-		call_php_function_with_1_params("date_default_timezone_set", NULL, &zonename);
-		zval_ptr_dtor(&zonename);
-	}
+	// @todo Restore removed timezone handling code? https://github.com/kiddivouchers/php-timecop/pull/6
 
 	ZVAL_LONG(&now_timestamp, now.sec);
 	call_php_function_with_2_params(ORIG_FUNC_NAME("strtotime"), &fixed_sec, time, &now_timestamp);
-
-	if (timezone_obj && Z_TYPE_P(timezone_obj) == IS_OBJECT) {
-		call_php_function_with_1_params("date_default_timezone_set", NULL, &orig_zonename);
-		zval_ptr_dtor(&orig_zonename);
-	}
 
 	if (Z_TYPE(fixed_sec) == IS_FALSE) {
 		ZVAL_FALSE(retval_time);
