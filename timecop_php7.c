@@ -203,7 +203,7 @@ static void _timecop_call_mktime(INTERNAL_FUNCTION_PARAMETERS, const char *mktim
 static int get_mock_timeval(tc_timeval *fixed, const tc_timeval *now);
 static inline zend_long mock_timestamp();
 
-static int get_timeval_from_datetime(tc_timeval *tp, zval *dt);
+static int get_timeval_from_datetime(tc_timeval *tp, zend_object *dt);
 static int get_current_time(tc_timeval *now);
 
 static void _timecop_orig_datetime_constructor(INTERNAL_FUNCTION_PARAMETERS, int immutable);
@@ -878,18 +878,19 @@ static void _timecop_call_mktime(INTERNAL_FUNCTION_PARAMETERS, const char *mktim
    Time travel to specified timestamp and freeze */
 PHP_FUNCTION(timecop_freeze)
 {
-	zval *dt;
+	zend_object *dt;
 	zend_long timestamp;
 	tc_timeval freezed_tv;
 
-	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "O", &dt, TIMECOP_G(ce_DateTimeInterface)) != FAILURE) {
+	ZEND_PARSE_PARAMETERS_START(1, 1);
+		Z_PARAM_OBJ_OF_CLASS_OR_LONG(dt, TIMECOP_G(ce_DateTimeInterface), timestamp);
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (dt) {
 		get_timeval_from_datetime(&freezed_tv, dt);
-	} else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "l", &timestamp) != FAILURE) {
+	} else {
 		freezed_tv.sec = timestamp;
 		freezed_tv.usec = 0;
-	} else {
-		php_error_docref(NULL, E_WARNING, "This function accepts either (DateTimeInterface) OR (int) as arguments.");
-		RETURN_FALSE;
 	}
 
 	TIMECOP_G(timecop_mode) = TIMECOP_MODE_FREEZE;
@@ -907,18 +908,19 @@ PHP_FUNCTION(timecop_freeze)
    Time travel to specified timestamp */
 PHP_FUNCTION(timecop_travel)
 {
-	zval *dt;
+	zend_object *dt;
 	zend_long timestamp;
 	tc_timeval now, mock_tv;
 
-	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "O", &dt, TIMECOP_G(ce_DateTimeInterface)) != FAILURE) {
+	ZEND_PARSE_PARAMETERS_START(1, 1);
+		Z_PARAM_OBJ_OF_CLASS_OR_LONG(dt, TIMECOP_G(ce_DateTimeInterface), timestamp);
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (dt) {
 		get_timeval_from_datetime(&mock_tv, dt);
-	} else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "l", &timestamp) != FAILURE) {
+	} else {
 		mock_tv.sec = timestamp;
 		mock_tv.usec = 0;
-	} else {
-		php_error_docref(NULL, E_WARNING, "This function accepts either (DateTimeInterface) OR (int) as arguments.");
-		RETURN_FALSE;
 	}
 
 	TIMECOP_G(timecop_mode) = TIMECOP_MODE_TRAVEL;
@@ -941,9 +943,10 @@ PHP_FUNCTION(timecop_scale)
 	zend_long scale;
 	tc_timeval now, mock_time;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &scale) == FAILURE) {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1);
+		Z_PARAM_LONG(scale);
+	ZEND_PARSE_PARAMETERS_END();
+
 	if (scale < 0) {
 		RETURN_FALSE;
 	}
@@ -1231,14 +1234,14 @@ static zend_long mock_timestamp()
 	return tv.sec;
 }
 
-static int get_timeval_from_datetime(tc_timeval *tp, zval *dt)
+static int get_timeval_from_datetime(tc_timeval *tp, zend_object *dt)
 {
 	zval sec, usec;
 	zval u_str;
 
-	call_php_method_with_0_params(dt, Z_OBJCE_P(dt), "gettimestamp", &sec);
+	zend_call_method_with_0_params(dt, dt->ce, NULL, "gettimestamp", &sec);
 	ZVAL_STRING(&u_str, "u");
-	call_php_method_with_1_params(dt, Z_OBJCE_P(dt), "format", &usec, &u_str);
+	zend_call_method_with_1_params(dt, dt->ce, NULL, "format", &usec, &u_str);
 	zval_ptr_dtor(&u_str);
 	convert_to_long(&usec);
 
