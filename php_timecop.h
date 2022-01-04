@@ -194,6 +194,19 @@ struct timecop_override_class_entry {
 #define call_php_function_with_3_params(function_name, retval, arg1, arg2, arg3) \
 	_call_php_function_with_3_params(function_name, retval, arg1, arg2, arg3 TSRMLS_CC)
 
+#if PHP_VERSION_ID >= 80000
+#define TIMECOP_PARSE_TRAVEL_ARGS(timeval) \
+	parse_travel_freeze_arguments(&timeval, INTERNAL_FUNCTION_PARAM_PASSTHRU)
+#else
+// PHP 7.x needs some extra error handling code to match up with PHP 8.
+#define TIMECOP_PARSE_TRAVEL_ARGS(timeval) \
+	if (parse_travel_freeze_arguments(&timeval, INTERNAL_FUNCTION_PARAM_PASSTHRU) > 0) { \
+		zend_type_error("%s(): Argument #1 ($timestamp) must be of type DateTimeInterface|int, N/A given", get_active_function_name()); \
+	}
+#endif
+
+#define TIMECOP_PARSE_FREEZE_ARGS TIMECOP_PARSE_TRAVEL_ARGS
+
 /* In every utility function you add that needs to use variables
    in php_timecop_globals, call TSRMLS_FETCH(); after declaring other
    variables used by that function, or better yet, pass in TSRMLS_CC

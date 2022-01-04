@@ -19,9 +19,9 @@ foreach (['', (object) [], '1234', 4.5, true] as $input) {
         echo $e->getMessage(), "\n";
     }
 }
---EXPECT--
-timecop_freeze(): Argument #1 ($timestamp) must be of type DateTimeInterface|int, string given
-timecop_freeze(): Argument #1 ($timestamp) must be of type DateTimeInterface|int, stdClass given
-timecop_freeze(): Argument #1 ($timestamp) must be of type DateTimeInterface|int, string given
-timecop_freeze(): Argument #1 ($timestamp) must be of type DateTimeInterface|int, float given
-timecop_freeze(): Argument #1 ($timestamp) must be of type DateTimeInterface|int, bool given
+--EXPECTREGEX--
+timecop_freeze\(\): Argument #1 \(\$timestamp\) must be of type DateTimeInterface|int, (N\/A|string) given
+timecop_freeze\(\): Argument #1 \(\$timestamp\) must be of type DateTimeInterface|int, (N\/A|stdClass) given
+timecop_freeze\(\): Argument #1 \(\$timestamp\) must be of type DateTimeInterface|int, (N\/A|string) given
+timecop_freeze\(\): Argument #1 \(\$timestamp\) must be of type DateTimeInterface|int, (N\/A|float) given
+timecop_freeze\(\): Argument #1 \(\$timestamp\) must be of type DateTimeInterface|int, (N\/A|bool) given

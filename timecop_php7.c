@@ -203,7 +203,12 @@ static void _timecop_call_mktime(INTERNAL_FUNCTION_PARAMETERS, const char *mktim
 static int get_mock_timeval(tc_timeval *fixed, const tc_timeval *now);
 static inline zend_long mock_timestamp();
 
-static int get_timeval_from_datetime(tc_timeval *tp, zend_object *dt);
+zend_always_inline static int parse_travel_freeze_arguments(tc_timeval *ret, INTERNAL_FUNCTION_PARAMETERS);
+#if PHP_VERSION_ID >= 80000
+zend_always_inline static int get_timeval_from_datetime(tc_timeval *tp, zend_object *dt, zend_class_entry *dt_ce);
+#else
+zend_always_inline static int get_timeval_from_datetime(tc_timeval *tp, zval *dt);
+#endif
 static int get_current_time(tc_timeval *now);
 
 static void _timecop_orig_datetime_constructor(INTERNAL_FUNCTION_PARAMETERS, int immutable);
@@ -878,20 +883,9 @@ static void _timecop_call_mktime(INTERNAL_FUNCTION_PARAMETERS, const char *mktim
    Time travel to specified timestamp and freeze */
 PHP_FUNCTION(timecop_freeze)
 {
-	zend_object *dt;
-	zend_long timestamp;
 	tc_timeval freezed_tv;
 
-	ZEND_PARSE_PARAMETERS_START(1, 1);
-		Z_PARAM_OBJ_OF_CLASS_OR_LONG(dt, TIMECOP_G(ce_DateTimeInterface), timestamp);
-	ZEND_PARSE_PARAMETERS_END();
-
-	if (dt) {
-		get_timeval_from_datetime(&freezed_tv, dt);
-	} else {
-		freezed_tv.sec = timestamp;
-		freezed_tv.usec = 0;
-	}
+	TIMECOP_PARSE_FREEZE_ARGS(freezed_tv);
 
 	TIMECOP_G(timecop_mode) = TIMECOP_MODE_FREEZE;
 	TIMECOP_G(freezed_time) = freezed_tv;
@@ -908,20 +902,9 @@ PHP_FUNCTION(timecop_freeze)
    Time travel to specified timestamp */
 PHP_FUNCTION(timecop_travel)
 {
-	zend_object *dt;
-	zend_long timestamp;
 	tc_timeval now, mock_tv;
 
-	ZEND_PARSE_PARAMETERS_START(1, 1);
-		Z_PARAM_OBJ_OF_CLASS_OR_LONG(dt, TIMECOP_G(ce_DateTimeInterface), timestamp);
-	ZEND_PARSE_PARAMETERS_END();
-
-	if (dt) {
-		get_timeval_from_datetime(&mock_tv, dt);
-	} else {
-		mock_tv.sec = timestamp;
-		mock_tv.usec = 0;
-	}
+	TIMECOP_PARSE_TRAVEL_ARGS(mock_tv);
 
 	TIMECOP_G(timecop_mode) = TIMECOP_MODE_TRAVEL;
 	get_current_time(&now);
@@ -1234,14 +1217,54 @@ static zend_long mock_timestamp()
 	return tv.sec;
 }
 
-static int get_timeval_from_datetime(tc_timeval *tp, zend_object *dt)
+// Used by timecop_travel() and timecop_freeze() to parse common arguments.
+zend_always_inline static int parse_travel_freeze_arguments(tc_timeval *ret, INTERNAL_FUNCTION_PARAMETERS)
+{
+	zval *dt_zval;
+	zend_object *dt_obj;
+	zend_long timestamp;
+
+#if PHP_VERSION_ID >= 80000
+	ZEND_PARSE_PARAMETERS_START(1, 1);
+		Z_PARAM_OBJ_OF_CLASS_OR_LONG(dt_obj, TIMECOP_G(ce_DateTimeInterface), timestamp);
+	ZEND_PARSE_PARAMETERS_END_EX(return 0;);
+
+	if (dt_obj) {
+		get_timeval_from_datetime(ret, dt_obj, dt_obj->ce);
+	} else {
+		ret->sec = timestamp;
+		ret->usec = 0;
+	}
+#else
+	// Cannot use ZEND_PARSE_PARAMS_THROW as it cannot output required type is "int|DateTime".
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "O", &dt_zval, TIMECOP_G(ce_DateTimeInterface)) != FAILURE) {
+		ZEND_PARSE_PARAMETERS_START_EX(ZEND_PARSE_PARAMS_QUIET, 1, 1)
+			Z_PARAM_OBJECT_OF_CLASS(dt_zval, TIMECOP_G(ce_DateTimeInterface));
+		ZEND_PARSE_PARAMETERS_END_EX(return 1;);
+
+		get_timeval_from_datetime(ret, dt_zval);
+	} else {
+		ZEND_PARSE_PARAMETERS_START_EX(ZEND_PARSE_PARAMS_QUIET, 1, 1)
+			Z_PARAM_LONG(timestamp);
+		ZEND_PARSE_PARAMETERS_END_EX(return 1;);
+
+		ret->sec = timestamp;
+		ret->usec = 0;
+	}
+#endif
+
+	return 0;
+}
+
+#if PHP_VERSION_ID >= 80000
+zend_always_inline static int get_timeval_from_datetime(tc_timeval *tp, zend_object *dt, zend_class_entry *dt_ce)
 {
 	zval sec, usec;
 	zval u_str;
 
-	zend_call_method_with_0_params(dt, dt->ce, NULL, "gettimestamp", &sec);
+	zend_call_method_with_0_params(dt, dt_ce, NULL, "gettimestamp", &sec);
 	ZVAL_STRING(&u_str, "u");
-	zend_call_method_with_1_params(dt, dt->ce, NULL, "format", &usec, &u_str);
+	zend_call_method_with_1_params(dt, dt_ce, NULL, "format", &usec, &u_str);
 	zval_ptr_dtor(&u_str);
 	convert_to_long(&usec);
 
@@ -1250,6 +1273,24 @@ static int get_timeval_from_datetime(tc_timeval *tp, zend_object *dt)
 
 	return 0;
 }
+#else
+zend_always_inline static int get_timeval_from_datetime(tc_timeval *tp, zval *dt)
+{
+	zval sec, usec;
+	zval u_str;
+
+	zend_call_method_with_0_params(dt, Z_OBJCE_P(dt), NULL, "gettimestamp", &sec);
+	ZVAL_STRING(&u_str, "u");
+	zend_call_method_with_1_params(dt, Z_OBJCE_P(dt), NULL, "format", &usec, &u_str);
+	zval_ptr_dtor(&u_str);
+	convert_to_long(&usec);
+
+	tp->sec = Z_LVAL(sec);
+	tp->usec = Z_LVAL(usec);
+
+	return 0;
+}
+#endif
 
 static int get_current_time(tc_timeval *now)
 {
