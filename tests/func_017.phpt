@@ -19,10 +19,10 @@ foreach (['', (object) [], '1234', 4.5, true, -10] as $input) {
         echo $e->getMessage(), "\n";
     }
 }
---EXPECT--
-timecop_scale(): Argument #1 ($scale) must be of type int, string given
-timecop_scale(): Argument #1 ($scale) must be of type int, stdClass given
-timecop_scale(): Argument #1 ($scale) must be of type int, string given
-timecop_scale(): Argument #1 ($scale) must be of type int, float given
-timecop_scale(): Argument #1 ($scale) must be of type int, bool given
-bool(false)
+--EXPECTREGEX--
+timecop_scale\(\)( expects parameter 1 to be|: Argument #1 \(\$scale\) must be of type) (integer|int), string given
+timecop_scale\(\)( expects parameter 1 to be|: Argument #1 \(\$scale\) must be of type) (integer|int), (object|stdClass) given
+timecop_scale\(\)( expects parameter 1 to be|: Argument #1 \(\$scale\) must be of type) (integer|int), string given
+timecop_scale\(\)( expects parameter 1 to be|: Argument #1 \(\$scale\) must be of type) (integer|int), float given
+timecop_scale\(\)( expects parameter 1 to be|: Argument #1 \(\$scale\) must be of type) (integer|int), (bool|boolean) given
+bool\(false\)
