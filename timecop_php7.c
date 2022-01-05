@@ -1227,7 +1227,7 @@ zend_always_inline static int parse_travel_freeze_arguments(tc_timeval *ret, INT
 #if PHP_VERSION_ID >= 80000
 	ZEND_PARSE_PARAMETERS_START(1, 1);
 		Z_PARAM_OBJ_OF_CLASS_OR_LONG(dt_obj, TIMECOP_G(ce_DateTimeInterface), timestamp);
-	ZEND_PARSE_PARAMETERS_END_EX(return 0;);
+	ZEND_PARSE_PARAMETERS_END_EX(return 1;);
 
 	if (dt_obj) {
 		get_timeval_from_datetime(ret, dt_obj, dt_obj->ce);
