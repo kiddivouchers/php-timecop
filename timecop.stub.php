@@ -26,7 +26,7 @@ SOFTWARE.
 
 // Use build/gen_stub.php from PHP 8 source code checkout to create .h contents.
 
-function timecop_freeze(\DateTimeInterface|int $timestamp): true {}
-function timecop_travel(\DateTimeInterface|int $timestamp): true {}
+function timecop_freeze(\DateTimeInterface|int $timestamp): bool {}
+function timecop_travel(\DateTimeInterface|int $timestamp): bool {}
 function timecop_scale(int $scale): bool {}
-function timecop_return(): true {}
+function timecop_return(): bool {}
