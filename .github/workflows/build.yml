@@ -37,6 +37,8 @@ jobs:
           phpts: ${{ matrix.php-zts }}
       - name: Set PHP_API
         run: |
+          php-config --help
+          php-config --phpapi
           echo "PHP_API=$(php-config --phpapi)" >> $GITHUB_ENV
       - name: Checkout
         uses: actions/checkout@v3
