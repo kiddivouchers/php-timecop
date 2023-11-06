@@ -24,5 +24,5 @@ timecop_scale\(\)( expects parameter 1 to be|: Argument #1 \(\$scale\) must be o
 timecop_scale\(\)( expects parameter 1 to be|: Argument #1 \(\$scale\) must be of type) (integer|int), (object|stdClass) given
 timecop_scale\(\)( expects parameter 1 to be|: Argument #1 \(\$scale\) must be of type) (integer|int), string given
 timecop_scale\(\)( expects parameter 1 to be|: Argument #1 \(\$scale\) must be of type) (integer|int), float given
-timecop_scale\(\)( expects parameter 1 to be|: Argument #1 \(\$scale\) must be of type) (integer|int), (bool|boolean) given
+timecop_scale\(\)( expects parameter 1 to be|: Argument #1 \(\$scale\) must be of type) (integer|int), (bool|boolean|true) given
 bool\(false\)
