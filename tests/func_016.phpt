@@ -35,6 +35,11 @@ foreach (['', (object) [], '1234', 4.5, true, new \DateTimeImmutable(), new \Dat
     } catch (TypeError $e) {
         $message = $e->getMessage();
 
+        if (PHP_VERSION_ID >= 80300) {
+            // PHP 8.3+ outputs "true given" instead of "bool given".
+            $message = str_replace('true given', 'bool given', $message);
+        }
+
         // Workaround exception message not including type in PHP 7 so the same test can be used for both.
         if (PHP_MAJOR_VERSION === 7) {
             $message = str_replace('N/A given', var_type($input).' given', $message);
