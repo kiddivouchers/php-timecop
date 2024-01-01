@@ -56,14 +56,14 @@ jobs:
           make
           make test REPORT_EXIT_STATUS=1 NO_INTERACTION=1 TESTS="--show-all"
       - name: Save artifact (NTS)
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: matrix.php-zts == 'nts'
         with:
           name: timecop_${{ env.PHP_API }}.so
           path: modules/timecop.so
           if-no-files-found: error
       - name: Save artifact (TS)
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: matrix.php-zts == 'ts'
         with:
           name: timecop_${{ env.PHP_API }}_zts.so
@@ -89,7 +89,7 @@ jobs:
           cd output
           sha256sum *.so > SHA256SUM
       - name: Save artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: timecop
           path: output/*
