@@ -17,6 +17,7 @@ jobs:
           - '7.4.19'
           - '8.1.25'
           - '8.2.12'
+          - '8.3.2'
         os:
           - 'ubuntu-22.04'
     steps:
@@ -61,6 +62,11 @@ jobs:
               gpg_fetch_key 1198C0117593497A5EC5C199286AF1F9897469DC
               gpg_fetch_key 39B641343D8C104B2B146DC3F9C39DC0B9698544
               gpg_fetch_key E60913E4DF209907D8E30D96659A97C9CF2A795A
+            ;;
+            8.3.*)
+              gpg_fetch_key 1198C0117593497A5EC5C199286AF1F9897469DC
+              gpg_fetch_key AFD8691FDAEDF03BDF6E460563F15A9B715376CA
+              gpg_fetch_key C28D937575603EB4ABB725861C0779DC5C0A9DE4
             ;;
             *)
               echo "::warning::No keys imported!"
