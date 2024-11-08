@@ -112,7 +112,10 @@ const zend_function_entry timecop_functions[] = {
 	PHP_FE(timecop_getdate, arginfo_timecop_getdate)
 	PHP_FE(timecop_localtime, arginfo_timecop_localtime)
 	PHP_FE(timecop_strtotime, arginfo_timecop_strtotime)
-#if PHP_VERSION_ID >= 80100
+#if PHP_VERSION_ID >= 80400
+	ZEND_RAW_FENTRY("timecop_strftime", zif_timecop_strftime, arginfo_timecop_strftime, ZEND_ACC_DEPRECATED, NULL, NULL)
+	ZEND_RAW_FENTRY("timecop_gmstrftime", zif_timecop_gmstrftime, arginfo_timecop_gmstrftime, ZEND_ACC_DEPRECATED, NULL, NULL)
+#elif PHP_VERSION_ID >= 80100
 	PHP_DEP_FE(timecop_strftime, arginfo_timecop_strftime)
 	PHP_DEP_FE(timecop_gmstrftime, arginfo_timecop_gmstrftime)
 #else
@@ -435,12 +438,12 @@ static int timecop_func_override()
 		TIMECOP_ASSERT(zf_ovrd->type == ZEND_INTERNAL_FUNCTION);
 
 		zend_hash_str_add_mem(CG(function_table), p->save_func, strlen(p->save_func),
-							  zf_orig, sizeof(zend_internal_function));
+							  zf_orig, sizeof(zend_function));
 		function_add_ref(zf_orig);
 
 		FIX_FUNCTION_ARG_INFO_DTOR(zf_orig);
 		zend_hash_str_update_mem(CG(function_table), p->orig_func, strlen(p->orig_func),
-								 zf_ovrd, sizeof(zend_internal_function));
+								 zf_ovrd, sizeof(zend_function));
 		function_add_ref(zf_ovrd);
 
 		p++;
@@ -509,12 +512,12 @@ static int timecop_class_override()
 
 		zend_hash_str_add_mem(&ce_orig->function_table,
 							  p->save_method, strlen(p->save_method),
-							  zf_orig, sizeof(zend_internal_function));
+							  zf_orig, sizeof(zend_function));
 		function_add_ref(zf_orig);
 
 		zf_new = zend_hash_str_update_mem(&ce_orig->function_table,
 										  p->orig_method, strlen(p->orig_method),
-										  zf_ovrd, sizeof(zend_internal_function));
+										  zf_ovrd, sizeof(zend_function));
 		function_add_ref(zf_ovrd);
 
 		TIMECOP_ASSERT(zf_new != NULL);
@@ -547,7 +550,7 @@ static int timecop_func_override_clear()
 
 		FIX_FUNCTION_ARG_INFO_DTOR(zf_ovld);
 		zend_hash_str_update_mem(CG(function_table), p->orig_func, strlen(p->orig_func),
-								 zf_orig, sizeof(zend_internal_function));
+								 zf_orig, sizeof(zend_function));
 		function_add_ref(zf_orig);
 
 		FIX_FUNCTION_ARG_INFO_DTOR(zf_orig);
@@ -586,7 +589,7 @@ static int timecop_class_override_clear()
 		}
 
 		zend_hash_str_update_mem(&ce_orig->function_table, p->orig_method, strlen(p->orig_method),
-								 zf_orig, sizeof(zend_internal_function));
+								 zf_orig, sizeof(zend_function));
 		function_add_ref(zf_orig);
 
 		zend_hash_str_del(&ce_orig->function_table, p->save_method, strlen(p->save_method));
