@@ -28,7 +28,7 @@ extension=timecop.so
 ## SYSTEM REQUIREMENTS
 
 - OS: Linux, macOS
-- PHP: 5.6.x - 8.3.x
+- PHP: 8.0.x - 8.4.x
 - SAPI: Apache, CLI
   - Other SAPIs are not tested, but there is no SAPI-dependent code.
 - non-ZTS(recommended), ZTS
@@ -54,13 +54,13 @@ extension=timecop.so
   - `gettimeofday()`
   - `unixtojd()`
   - `DateTime::_construct()`
-  - `DateTime::createFromFormat()` (PHP >= 5.3.0)
-  - `DateTimeImmutable::_construct()` (PHP >= 5.5.0)
-  - `DateTimeImmutable::createFromFormat()` (PHP >= 5.5.0)
+  - `DateTime::createFromFormat()`
+  - `DateTimeImmutable::_construct()`
+  - `DateTimeImmutable::createFromFormat()`
   - `date_create()`
-  - `date_create_from_format()` (PHP >= 5.3.0)
-  - `date_create_immutable()` (PHP >= 5.5.0)
-  - `date_create_immutable_from_format()` (PHP >= 5.5.0)
+  - `date_create_from_format()`
+  - `date_create_immutable()`
+  - `date_create_immutable_from_format()`
 - Rewrite value of the following global variables when the time has been moved.
   - `$_SERVER['REQUEST_TIME']`
 
@@ -105,6 +105,12 @@ var_dump((new DateTime())->format("c")); // string(25) "2017-01-01T00:00:05+00:0
 ```
 
 ## CHANGELOG
+
+### version 1.7.0, 2024/03/20
+- Support PHP 8.4
+- Drop support for PHP 5.x and 7.x
+- Fix segmentation faults in PHP 8.4
+- Improved memory management
 
 ### version 1.6.0, 2024/02/09
 - Support PHP 8.3
@@ -228,6 +234,7 @@ The MIT License
 
 Copyright (c) 2012-2017 Yoshio HANAWA
 Copyright (c) 2019-2024 Wider Plan Ltd
+Copyright (c) 2024 Sylvain Filteau
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 

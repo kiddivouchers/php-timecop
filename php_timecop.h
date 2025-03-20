@@ -2,6 +2,8 @@
 MIT License
 
 Copyright (c) 2012-2017 Yoshio HANAWA
+Copyright (c) 2019-2024 Wider Plan Ltd
+Copyright (c) 2024 Sylvain Filteau
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -25,7 +27,7 @@ SOFTWARE.
 #ifndef PHP_TIMECOP_H
 #define PHP_TIMECOP_H
 
-#define PHP_TIMECOP_VERSION "1.6.0"
+#define PHP_TIMECOP_VERSION "1.7.0"
 
 extern zend_module_entry timecop_module_entry;
 #define phpext_timecop_ptr &timecop_module_entry
@@ -79,22 +81,13 @@ PHP_FUNCTION(timecop_gettimeofday);
 PHP_FUNCTION(timecop_unixtojd);
 PHP_FUNCTION(timecop_date_create);
 PHP_FUNCTION(timecop_date_create_from_format);
-#if PHP_VERSION_ID >= 50500
 PHP_FUNCTION(timecop_date_create_immutable);
 PHP_FUNCTION(timecop_date_create_immutable_from_format);
-#endif
-#if !defined(PHP_VERSION_ID) || PHP_VERSION_ID < 50300
-PHP_FUNCTION(date_timestamp_set);
-PHP_FUNCTION(date_timestamp_get);
-#endif
 
 PHP_METHOD(TimecopDateTime, __construct);
 PHP_METHOD(TimecopOrigDateTime, __construct);
-
-#if PHP_VERSION_ID >= 50500
 PHP_METHOD(TimecopDateTimeImmutable, __construct);
 PHP_METHOD(TimecopOrigDateTimeImmutable, __construct);
-#endif
 
 PHP_METHOD(Timecop, freeze);
 PHP_METHOD(Timecop, travel);
@@ -108,20 +101,12 @@ typedef enum timecop_mode_t {
 ZEND_BEGIN_MODULE_GLOBALS(timecop)
 	long func_override;
 	long sync_request_time;
-#if PHP_VERSION_ID >= 70000
 	zval orig_request_time;
-#else
-	zval *orig_request_time;
-#endif
 	timecop_mode_t timecop_mode;
 	tc_timeval freezed_time;
 	tc_timeval travel_origin;
 	tc_timeval travel_offset;
-#if PHP_VERSION_ID >= 70000
 	zend_long scaling_factor;
-#else
-	long scaling_factor;
-#endif
 	zend_class_entry *ce_DateTimeZone;
 	zend_class_entry *ce_DateTimeInterface;
 	zend_class_entry *ce_DateTime;
@@ -211,17 +196,9 @@ struct timecop_override_class_entry {
 #define TSRMLS_FETCH()
 #endif
 
-#if PHP_VERSION_ID >= 70000
-#  define TIMECOP_G(v) ZEND_MODULE_GLOBALS_ACCESSOR(timecop, v)
-#  if defined(ZTS) && defined(COMPILE_DL_TIMECOP)
-     ZEND_TSRMLS_CACHE_EXTERN();
-#  endif
-#else
-#  ifdef ZTS
-#    define TIMECOP_G(v) TSRMG(timecop_globals_id, zend_timecop_globals *, v)
-#  else
-#    define TIMECOP_G(v) (timecop_globals.v)
-#  endif
+#define TIMECOP_G(v) ZEND_MODULE_GLOBALS_ACCESSOR(timecop, v)
+#if defined(ZTS) && defined(COMPILE_DL_TIMECOP)
+   ZEND_TSRMLS_CACHE_EXTERN();
 #endif
 
 #endif	/* PHP_TIMECOP_H */
