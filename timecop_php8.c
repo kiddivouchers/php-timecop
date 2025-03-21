@@ -71,8 +71,6 @@ static const struct timecop_override_func_entry timecop_override_func_table[] = 
 	TIMECOP_OFE("getdate"),
 	TIMECOP_OFE("localtime"),
 	TIMECOP_OFE("strtotime"),
-	TIMECOP_OFE("strftime"),
-	TIMECOP_OFE("gmstrftime"),
 #ifdef HAVE_GETTIMEOFDAY
 	TIMECOP_OFE("microtime"),
 	TIMECOP_OFE("gettimeofday"),
@@ -110,16 +108,6 @@ const zend_function_entry timecop_functions[] = {
 	PHP_FE(timecop_getdate, arginfo_timecop_getdate)
 	PHP_FE(timecop_localtime, arginfo_timecop_localtime)
 	PHP_FE(timecop_strtotime, arginfo_timecop_strtotime)
-#if PHP_VERSION_ID >= 80400
-	ZEND_RAW_FENTRY("timecop_strftime", zif_timecop_strftime, arginfo_timecop_strftime, ZEND_ACC_DEPRECATED, NULL, NULL)
-	ZEND_RAW_FENTRY("timecop_gmstrftime", zif_timecop_gmstrftime, arginfo_timecop_gmstrftime, ZEND_ACC_DEPRECATED, NULL, NULL)
-#elif PHP_VERSION_ID >= 80100
-	PHP_DEP_FE(timecop_strftime, arginfo_timecop_strftime)
-	PHP_DEP_FE(timecop_gmstrftime, arginfo_timecop_gmstrftime)
-#else
-	PHP_FE(timecop_strftime, arginfo_timecop_strftime)
-	PHP_FE(timecop_gmstrftime, arginfo_timecop_gmstrftime)
-#endif
 #ifdef HAVE_GETTIMEOFDAY
 	PHP_FE(timecop_microtime, arginfo_timecop_microtime)
 	PHP_FE(timecop_gettimeofday, arginfo_timecop_gettimeofday)
@@ -234,9 +222,7 @@ zend_module_entry timecop_module_entry = {
 	PHP_RINIT(timecop),
 	PHP_RSHUTDOWN(timecop),
 	PHP_MINFO(timecop),
-#if ZEND_MODULE_API_NO >= 20010901
 	PHP_TIMECOP_VERSION,
-#endif
 	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */
@@ -989,7 +975,6 @@ PHP_FUNCTION(timecop_mktime)
 	zend_long hou = 0, min = 0, sec = 0, mon = 0, day = 0, yea = 0;
 	zend_bool min_is_null = 1, sec_is_null = 1, mon_is_null = 1, day_is_null = 1, yea_is_null = 1;
 
-#if PHP_VERSION_ID >= 80000
 	ZEND_PARSE_PARAMETERS_START(1, 6)
 		Z_PARAM_LONG(hou)
 		Z_PARAM_OPTIONAL
@@ -999,17 +984,6 @@ PHP_FUNCTION(timecop_mktime)
 		Z_PARAM_LONG_OR_NULL(day, day_is_null)
 		Z_PARAM_LONG_OR_NULL(yea, yea_is_null)
 	ZEND_PARSE_PARAMETERS_END();
-#else
-	ZEND_PARSE_PARAMETERS_START(0, 6)
-		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG(hou)
-		Z_PARAM_LONG(min)
-		Z_PARAM_LONG(sec)
-		Z_PARAM_LONG(mon)
-		Z_PARAM_LONG(day)
-		Z_PARAM_LONG(yea)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
-#endif
 
 	TIMECOP_CALL_MKTIME("mktime", "date");
 }
@@ -1022,7 +996,6 @@ PHP_FUNCTION(timecop_gmmktime)
 	zend_long hou = 0, min = 0, sec = 0, mon = 0, day = 0, yea = 0;
 	zend_bool min_is_null = 1, sec_is_null = 1, mon_is_null = 1, day_is_null = 1, yea_is_null = 1;
 
-#if PHP_VERSION_ID >= 80000
 	ZEND_PARSE_PARAMETERS_START(1, 6)
 		Z_PARAM_LONG(hou)
 		Z_PARAM_OPTIONAL
@@ -1032,17 +1005,6 @@ PHP_FUNCTION(timecop_gmmktime)
 		Z_PARAM_LONG_OR_NULL(day, day_is_null)
 		Z_PARAM_LONG_OR_NULL(yea, yea_is_null)
 	ZEND_PARSE_PARAMETERS_END();
-#else
-	ZEND_PARSE_PARAMETERS_START(0, 6)
-		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG(hou)
-		Z_PARAM_LONG(min)
-		Z_PARAM_LONG(sec)
-		Z_PARAM_LONG(mon)
-		Z_PARAM_LONG(day)
-		Z_PARAM_LONG(yea)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
-#endif
 
 	TIMECOP_CALL_MKTIME("gmmktime", "gmdate");
 }
@@ -1140,38 +1102,6 @@ PHP_FUNCTION(timecop_strtotime)
 	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	TIMECOP_CALL_FUNCTION("strtotime", 1);
-}
-/* }}} */
-
-/* {{{ proto string timecop_strftime(string format [, int timestamp])
-   Format a local time/date according to locale settings */
-PHP_FUNCTION(timecop_strftime)
-{
-	zend_string *format;
-	zend_long timestamp;
-	ZEND_PARSE_PARAMETERS_START(1, 2)
-		Z_PARAM_STR(format)
-		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG(timestamp)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
-
-	TIMECOP_CALL_FUNCTION("strftime", 1);
-}
-/* }}} */
-
-/* {{{ proto string timecop_gmstrftime(string format [, int timestamp])
-   Format a GMT/UCT time/date according to locale settings */
-PHP_FUNCTION(timecop_gmstrftime)
-{
-	zend_string *format;
-	zend_long timestamp = 0;
-	ZEND_PARSE_PARAMETERS_START(1, 2)
-		Z_PARAM_STR(format)
-		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG(timestamp)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
-
-	TIMECOP_CALL_FUNCTION("gmstrftime", 1);
 }
 /* }}} */
 
@@ -1381,7 +1311,6 @@ static void _timecop_datetime_constructor_ex(INTERNAL_FUNCTION_PARAMETERS, zval 
 	const char *real_func;
 	zend_class_entry *real_ce;
 
-#if PHP_VERSION_ID >= 80100
 	ZEND_PARSE_PARAMETERS_START(0, 2)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_STRING(orig_time_str, orig_time_len)
@@ -1389,17 +1318,6 @@ static void _timecop_datetime_constructor_ex(INTERNAL_FUNCTION_PARAMETERS, zval 
 	ZEND_PARSE_PARAMETERS_END();
 
 	ZVAL_STRINGL(&orig_time, orig_time_str, orig_time_len);
-#else
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|sO!", &orig_time_str, &orig_time_len, &orig_timezone, TIMECOP_G(ce_DateTimeZone)) == FAILURE) {
-		RETURN_FALSE;
-	}
-
-	if (orig_time_str == NULL) {
-		ZVAL_NULL(&orig_time);
-	} else {
-		ZVAL_STRINGL(&orig_time, orig_time_str, orig_time_len);
-	}
-#endif
 
 	if (immutable) {
 		real_func = ORIG_FUNC_NAME("date_create_immutable");
@@ -1498,20 +1416,9 @@ static void _timecop_date_create_from_format(INTERNAL_FUNCTION_PARAMETERS, int i
 			   memchr(orig_format_str, 'U', orig_format_len)) {
 		ZVAL_STRING(&fixed_format, "Y-m-d H:i:s.??????");
 	} else if (memchr(orig_format_str, 'u', orig_format_len)) {
-		// https://bugs.php.net/bug.php?id=78603
-#if PHP_VERSION_ID >= 70300
 		ZVAL_STRING(&fixed_format, "Y-m-d ??:??:??.??????");
-#elif PHP_VERSION_ID >= 70100
-		ZVAL_STRING(&fixed_format, "Y-m-d H:i:s.u");
-#else
-		ZVAL_STRING(&fixed_format, "Y-m-d H:i:s.??????");
-#endif
 	} else {
-#if PHP_VERSION_ID >= 70100
 		ZVAL_STRING(&fixed_format, "Y-m-d H:i:s.u");
-#else
-		ZVAL_STRING(&fixed_format, "Y-m-d H:i:s.??????");
-#endif
 	}
 
 	ZVAL_STRING(&tmp, "%s %s");
@@ -1619,11 +1526,7 @@ static inline zval* _call_php_method_with_2_params(zval *object_pp, zend_class_e
 static inline zval* _call_php_method(zval *object_pp, zend_class_entry *obj_ce, const char *method_name, zval *retval_ptr, int param_count, zval* arg1, zval* arg2)
 {
 	return zend_call_method(
-#if PHP_MAJOR_VERSION >= 8
 		object_pp == NULL ? NULL : Z_OBJ_P(object_pp),
-#else
-		object_pp,
-#endif
 		obj_ce,
 		NULL,
 		method_name,
@@ -1669,4 +1572,3 @@ static inline void _call_php_function_with_params(const char *function_name, zva
  * vim600: noet sw=4 ts=4 fdm=marker
  * vim<600: noet sw=4 ts=4
  */
-

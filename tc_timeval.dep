@@ -1,1 +1,2 @@
-tc_timeval.lo: /app/tc_timeval.c /app/tc_timeval.h
+tc_timeval.lo: /home/sylvain/projects/php-timecop/tc_timeval.c \
+ /home/sylvain/projects/php-timecop/tc_timeval.h

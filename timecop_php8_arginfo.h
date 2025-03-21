@@ -78,13 +78,6 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_timecop_strtotime, 0, 1, MAY_BE_
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, baseTimestamp, IS_LONG, 1, "null")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_timecop_strftime, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
-	ZEND_ARG_TYPE_INFO(0, format, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, timestamp, IS_LONG, 1, "null")
-ZEND_END_ARG_INFO()
-
-#define arginfo_timecop_gmstrftime arginfo_timecop_strftime
-
 #ifdef HAVE_GETTIMEOFDAY
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_timecop_microtime, 0, 0, MAY_BE_STRING|MAY_BE_DOUBLE)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, as_float, _IS_BOOL, 0, "false")
@@ -119,11 +112,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_TimecopDateTime___construct, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
 // TimecopDateTime::createFromFormat()
-#if PHP_VERSION_ID >= 80100
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_TimecopDateTime_createFromFormat, 0, 2, DateTime, MAY_BE_FALSE)
-#else
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_TimecopDateTime_createFromFormat, 0, 0, 2)
-#endif
 	ZEND_ARG_TYPE_INFO(0, format, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, datetime, IS_STRING, 0)
 	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, timezone, DateTimeZone, 1, "null")
@@ -146,11 +135,7 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_TimecopDateTimeImmutable___construct arginfo_class_TimecopDateTime___construct
 
 // TimecopDateTimeImmutable::createFromFormat
-#if PHP_VERSION_ID >= 80100
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_TimecopDateTimeImmutable_createFromFormat, 0, 2, DateTimeImmutable, MAY_BE_FALSE)
-#else
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_TimecopDateTimeImmutable_createFromFormat, 0, 0, 2)
-#endif
 	ZEND_ARG_TYPE_INFO(0, format, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, datetime, IS_STRING, 0)
 	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, timezone, DateTimeZone, 1, "null")

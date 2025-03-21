@@ -137,11 +137,7 @@ ZEND_END_MODULE_GLOBALS(timecop)
  * Trick for guarding the multi-referenced internal function from function destructor on PHP 7.2.0+
  * See: https://github.com/hnw/php-timecop/issues/29#issuecomment-332171527
  */
-#if PHP_VERSION_ID >= 70200
 #  define FIX_FUNCTION_ARG_INFO_DTOR(zend_func) zend_func->common.arg_info = NULL;
-#else
-#  define FIX_FUNCTION_ARG_INFO_DTOR(zend_func)
-#endif
 
 struct timecop_override_func_entry {
 	char *orig_func;
@@ -188,13 +184,11 @@ struct timecop_override_class_entry {
 */
 
 /* Redeclare macros as no-ops which were removed in PHP 8. */
-#if PHP_VERSION_ID >= 80000
 #define TSRMLS_D void
 #define TSRMLS_DC
 #define TSRMLS_C
 #define TSRMLS_CC
 #define TSRMLS_FETCH()
-#endif
 
 #define TIMECOP_G(v) ZEND_MODULE_GLOBALS_ACCESSOR(timecop, v)
 #if defined(ZTS) && defined(COMPILE_DL_TIMECOP)

@@ -1,4 +1,5 @@
-timecop_php8.lo: /app/timecop_php8.c /app/config.h \
+timecop_php8.lo: /home/sylvain/projects/php-timecop/timecop_php8.c \
+ /home/sylvain/projects/php-timecop/config.h \
  /usr/include/php/20240924/main/php.h \
  /usr/include/php/20240924/main/php_version.h \
  /usr/include/php/20240924/Zend/zend.h \
@@ -90,7 +91,9 @@ timecop_php8.lo: /app/timecop_php8.c /app/config.h \
  /usr/include/php/20240924/Zend/zend_constants.h \
  /usr/include/php/20240924/main/php_reentrancy.h \
  /usr/include/php/20240924/main/php_ini.h \
- /usr/include/php/20240924/ext/standard/info.h /app/php_timecop.h \
+ /usr/include/php/20240924/ext/standard/info.h \
+ /home/sylvain/projects/php-timecop/php_timecop.h \
  /usr/include/php/20240924/Zend/zend_interfaces.h \
- /usr/include/php/20240924/Zend/zend_API.h /app/tc_timeval.h \
- /app/timecop_php8_arginfo.h
+ /usr/include/php/20240924/Zend/zend_API.h \
+ /home/sylvain/projects/php-timecop/tc_timeval.h \
+ /home/sylvain/projects/php-timecop/timecop_php8_arginfo.h

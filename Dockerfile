@@ -33,7 +33,7 @@ RUN sed -i -e "s/upload_max_filesize\s*=\s*2M/upload_max_filesize = 100M/g" /etc
     sed -i -e "s/listen = \/run\/php\/php8.4-fpm.sock/;listen = \/run\/php\/php8.4-fpm.sock\nlisten = 0:9000/g" /etc/php/8.4/fpm/pool.d/www.conf && \
     sed -i -e "s/upload_max_filesize\s*=\s*2M/upload_max_filesize = 100M/g" /etc/php/8.4/cli/php.ini
 
-RUN apt install php8.4-phpdbg
+RUN apt install -y php8.4-phpdbg gdb
 
 COPY . /tmp/install/php-timecop
 
