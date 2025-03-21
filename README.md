@@ -28,7 +28,7 @@ extension=timecop.so
 ## SYSTEM REQUIREMENTS
 
 - OS: Linux, macOS
-- PHP: 8.0.x - 8.4.x
+- PHP: 8.4.x+
 - SAPI: Apache, CLI
   - Other SAPIs are not tested, but there is no SAPI-dependent code.
 - non-ZTS(recommended), ZTS
@@ -48,8 +48,6 @@ extension=timecop.so
   - `getdate()`
   - `localtime()`
   - `strtotime()`
-  - `strftime()`
-  - `gmstrftime()`
   - `microtime()`
   - `gettimeofday()`
   - `unixtojd()`
@@ -108,9 +106,10 @@ var_dump((new DateTime())->format("c")); // string(25) "2017-01-01T00:00:05+00:0
 
 ### version 1.7.0, 2024/03/20
 - Support PHP 8.4
-- Drop support for PHP 5.x and 7.x
+- Drop support for PHP 5.x to 8.3.x
 - Fix segmentation faults in PHP 8.4
 - Improved memory management
+- Drop support for `strftime` and `gmstrftime`
 
 ### version 1.6.0, 2024/02/09
 - Support PHP 8.3
