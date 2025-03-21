@@ -106,6 +106,10 @@ var_dump((new DateTime())->format("c")); // string(25) "2017-01-01T00:00:05+00:0
 
 ## CHANGELOG
 
+### version 1.7.0, 2025/03/21
+- Support PHP 8.4
+- Remove `gmstrftime()` and `strftime()` support on PHP ≥ 8.4
+
 ### version 1.6.0, 2024/02/09
 - Support PHP 8.3
 
