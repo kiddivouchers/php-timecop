@@ -69,8 +69,10 @@ static const struct timecop_override_func_entry timecop_override_func_table[] = 
 	TIMECOP_OFE("getdate"),
 	TIMECOP_OFE("localtime"),
 	TIMECOP_OFE("strtotime"),
+#if PHP_VERSION_ID < 80400
 	TIMECOP_OFE("strftime"),
 	TIMECOP_OFE("gmstrftime"),
+#endif
 #ifdef HAVE_GETTIMEOFDAY
 	TIMECOP_OFE("microtime"),
 	TIMECOP_OFE("gettimeofday"),
@@ -113,8 +115,6 @@ const zend_function_entry timecop_functions[] = {
 	PHP_FE(timecop_localtime, arginfo_timecop_localtime)
 	PHP_FE(timecop_strtotime, arginfo_timecop_strtotime)
 #if PHP_VERSION_ID >= 80400
-	ZEND_RAW_FENTRY("timecop_strftime", zif_timecop_strftime, arginfo_timecop_strftime, ZEND_ACC_DEPRECATED, NULL, NULL)
-	ZEND_RAW_FENTRY("timecop_gmstrftime", zif_timecop_gmstrftime, arginfo_timecop_gmstrftime, ZEND_ACC_DEPRECATED, NULL, NULL)
 #elif PHP_VERSION_ID >= 80100
 	PHP_DEP_FE(timecop_strftime, arginfo_timecop_strftime)
 	PHP_DEP_FE(timecop_gmstrftime, arginfo_timecop_gmstrftime)
@@ -1145,6 +1145,8 @@ PHP_FUNCTION(timecop_strtotime)
 }
 /* }}} */
 
+#if PHP_VERSION_ID < 80400
+
 /* {{{ proto string timecop_strftime(string format [, int timestamp])
    Format a local time/date according to locale settings */
 PHP_FUNCTION(timecop_strftime)
@@ -1176,6 +1178,8 @@ PHP_FUNCTION(timecop_gmstrftime)
 	TIMECOP_CALL_FUNCTION("gmstrftime", 1);
 }
 /* }}} */
+
+#endif
 
 /*
  * get_mock_timeval(fixed, now)

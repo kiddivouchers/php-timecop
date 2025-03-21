@@ -48,8 +48,8 @@ extension=timecop.so
   - `getdate()`
   - `localtime()`
   - `strtotime()`
-  - `strftime()`
-  - `gmstrftime()`
+  - `strftime()` (PHP < 8.4.0)
+  - `gmstrftime()` (PHP < 8.4.0)
   - `microtime()`
   - `gettimeofday()`
   - `unixtojd()`

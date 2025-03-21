@@ -2,7 +2,7 @@
 Check reflection data for overridden functions
 --SKIPIF--
 <?php
-$required_version_less_than = '8.4.0';
+$required_version = '8.4.0';
 $required_func = array();
 $required_class = array();
 $required_method = array();
@@ -21,8 +21,6 @@ $functions = [
 	'getdate' => 'timecop_getdate',
 	'localtime' => 'timecop_localtime',
 	'strtotime' => 'timecop_strtotime',
-	'strftime' => 'timecop_strftime',
-	'gmstrftime' => 'timecop_gmstrftime',
 	'date_create' => 'timecop_date_create',
 	'date_create_from_format' => 'timecop_date_create_from_format',
 	'date_create_immutable' => 'timecop_date_create_immutable',
@@ -39,8 +37,6 @@ Checking idate vs timecop_idate
 Checking getdate vs timecop_getdate
 Checking localtime vs timecop_localtime
 Checking strtotime vs timecop_strtotime
-Checking strftime vs timecop_strftime
-Checking gmstrftime vs timecop_gmstrftime
 Checking date_create vs timecop_date_create
 Checking date_create_from_format vs timecop_date_create_from_format
 Checking date_create_immutable vs timecop_date_create_immutable

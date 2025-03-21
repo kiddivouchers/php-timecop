@@ -2,6 +2,7 @@
 Function overrideing test for strftime
 --SKIPIF--
 <?php
+$required_version_less_than = '8.4.0';
 $required_func = array("timecop_strtotime", "timecop_freeze");
 include(__DIR__."/tests-skipcheck.inc.php");
 --INI--
