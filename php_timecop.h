@@ -70,8 +70,10 @@ PHP_FUNCTION(timecop_idate);
 PHP_FUNCTION(timecop_getdate);
 PHP_FUNCTION(timecop_localtime);
 PHP_FUNCTION(timecop_strtotime);
+#if PHP_VERSION_ID < 80400
 PHP_FUNCTION(timecop_strftime);
 PHP_FUNCTION(timecop_gmstrftime);
+#endif
 #ifdef HAVE_GETTIMEOFDAY
 PHP_FUNCTION(timecop_microtime);
 PHP_FUNCTION(timecop_gettimeofday);
