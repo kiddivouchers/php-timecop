@@ -29,15 +29,16 @@ function var_type($value): string
     return 'unknown';
 }
 
-foreach (['', (object) [], '1234', 4.5, true, new \DateTimeImmutable(), new \DateTime(), 64] as $input) {
+foreach (['', (object) [], '1234', 4.5, true, false, new \DateTimeImmutable(), new \DateTime(), 64] as $input) {
     try {
         var_dump(timecop_travel($input));
     } catch (TypeError $e) {
         $message = $e->getMessage();
 
         if (PHP_VERSION_ID >= 80300) {
-            // PHP 8.3+ outputs "true given" instead of "bool given".
+            // PHP 8.3+ outputs "{true,false} given" instead of "bool given".
             $message = str_replace('true given', 'bool given', $message);
+            $message = str_replace('false given', 'bool given', $message);
         }
 
         // Workaround exception message not including type in PHP 7 so the same test can be used for both.
@@ -53,6 +54,7 @@ timecop_travel(): Argument #1 ($timestamp) must be of type DateTimeInterface|int
 timecop_travel(): Argument #1 ($timestamp) must be of type DateTimeInterface|int, stdClass given
 timecop_travel(): Argument #1 ($timestamp) must be of type DateTimeInterface|int, string given
 timecop_travel(): Argument #1 ($timestamp) must be of type DateTimeInterface|int, float given
+timecop_travel(): Argument #1 ($timestamp) must be of type DateTimeInterface|int, bool given
 timecop_travel(): Argument #1 ($timestamp) must be of type DateTimeInterface|int, bool given
 bool(true)
 bool(true)
