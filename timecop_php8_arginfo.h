@@ -23,19 +23,24 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
  */
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_timecop_freeze, 0, 0, 1)
-	ZEND_ARG_INFO(0, timestamp)
+// https://php.watch/versions/8.2/true-type
+ #if PHP_VERSION_ID >= 80200
+#define TIMECOP_RETURN_TRUE IS_TRUE
+#else
+#define TIMECOP_RETURN_TRUE _IS_BOOL
+#endif
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_timecop_freeze, 0, 1, TIMECOP_RETURN_TRUE, 0)
+	ZEND_ARG_OBJ_TYPE_MASK(0, timestamp, DateTimeInterface, MAY_BE_LONG, NULL)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_timecop_travel, 0, 0, 1)
-	ZEND_ARG_INFO(0, timestamp)
+#define arginfo_timecop_travel arginfo_timecop_freeze
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_timecop_scale, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, scale, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_timecop_scale, 0, 0, 1)
-	ZEND_ARG_INFO(0, scale)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_timecop_return, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_timecop_return, 0, 0, TIMECOP_RETURN_TRUE, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_timecop_time, 0, 0, IS_LONG, 0)
