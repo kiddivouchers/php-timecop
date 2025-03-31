@@ -1,0 +1,22 @@
+name: Lint
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+  release:
+    types: [created]
+jobs:
+  arginfo:
+    name: Verify timecop_arginfo.h
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - run: |
+          expected="$(sha1sum timecop.stub.php | awk '{ print $1 }')"
+
+          if ! grep -q "$expected" timecop_arginfo.h; then
+            echo "timecop_arginfo.h needs regenerating."
+            echo
+            echo "make -B timecop_arginfo.h"
+          fi

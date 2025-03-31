@@ -24,9 +24,96 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
  */
 
-// Use build/gen_stub.php from PHP 8 source code checkout to create .h contents.
-
+#if PHP_VERSION_ID >= 80200
+function timecop_freeze(\DateTimeInterface|int $timestamp): true {}
+function timecop_travel(\DateTimeInterface|int $timestamp): true {}
+function timecop_scale(int $scale): bool {}
+function timecop_return(): true {}
+#else
 function timecop_freeze(\DateTimeInterface|int $timestamp): bool {}
 function timecop_travel(\DateTimeInterface|int $timestamp): bool {}
 function timecop_scale(int $scale): bool {}
 function timecop_return(): bool {}
+#endif
+
+function timecop_time(): int {}
+
+function timecop_mktime(
+    int $hour,
+    ?int $minute = null,
+    ?int $second = null,
+    ?int $month = null,
+    ?int $day = null,
+    ?int $year = null
+): int|false {}
+
+function timecop_gmmktime(
+    int $hour,
+    ?int $minute = null,
+    ?int $second = null,
+    ?int $month = null,
+    ?int $day = null,
+    ?int $year = null
+): int|false {}
+
+function timecop_date(string $format, ?int $timestamp = null): string {}
+function timecop_gmdate(string $format, ?int $timestamp = null): string {}
+function timecop_idate(string $format, ?int $timestamp = null): int|false {}
+function timecop_localtime(?int $timestamp = null, bool $associative = false): array {}
+function timecop_strtotime(string $datetime, ?int $baseTimestamp = null): int|false {}
+#if PHP_VERSION_ID < 80400
+function timecop_strftime(string $format, ?int $timestamp = null): string|false {}
+function timecop_gmstrftime(string $format, ?int $timestamp = null): string|false {}
+#endif
+function timecop_microtime(bool $as_float = false): string|float {}
+function timecop_gettimeofday(bool $as_float = false): array|float {}
+function timecop_unixtojd(?int $timestamp = null): int|false {}
+function timecop_getdate(?int $timestamp = null): array {}
+function timecop_date_create(string $datetime = "now", ?DateTimeZone $timezone = null): DateTime|false {}
+function timecop_date_create_from_format(string $format, string $datetime, ?DateTimeZone $timezone = null): DateTime|false {}
+function timecop_date_create_immutable(string $datetime = "now", ?DateTimeZone $timezone = null): DateTimeImmutable|false {}
+function timecop_date_create_immutable_from_format(string $format, string $datetime, ?DateTimeZone $timezone = null): DateTimeImmutable|false {}
+
+class TimecopDateTime extends DateTime
+{
+    public function __construct(string $datetime = "now", ?DateTimeZone $timezone = null)
+    {
+
+    }
+
+#if PHP_VERSION_ID >= 80100
+    /** @tentative-return-type */
+    public static function createFromFormat(string $format, string $datetime, ?DateTimeZone $timezone = null): DateTime|false
+    {
+
+    }
+#else
+    /** @return DateTime|false */
+    public static function createFromFormat(string $format, string $datetime, ?DateTimeZone $timezone = null)
+    {
+
+    }
+#endif
+}
+
+class TimecopDateTimeImmutable extends DateTimeImmutable
+{
+    public function __construct(string $datetime = "now", ?DateTimeZone $timezone = null)
+    {
+
+    }
+
+#if PHP_VERSION_ID >= 80100
+    /** @tentative-return-type */
+    public static function createFromFormat(string $format, string $datetime, ?DateTimeZone $timezone = null): DateTimeImmutable|false
+    {
+
+    }
+#else
+    /** @return DateTimeImmutable|false */
+    public static function createFromFormat(string $format, string $datetime, ?DateTimeZone $timezone = null)
+    {
+
+    }
+#endif
+}

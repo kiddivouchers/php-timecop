@@ -31,7 +31,8 @@ main() {
     done
     set -- "${positional[@]}" # restore positional parameters
 
-   compile_each "$@"
+    make PHP_EXECUTABLE="$(php_binary php 8.4)" timecop_arginfo.h
+    compile_each "$@"
 }
 
 usage() {
