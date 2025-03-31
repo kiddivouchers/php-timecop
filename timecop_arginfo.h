@@ -24,7 +24,7 @@ SOFTWARE.
  */
 
 // https://php.watch/versions/8.2/true-type
- #if PHP_VERSION_ID >= 80200
+#if PHP_VERSION_ID >= 80200
 #define TIMECOP_RETURN_TRUE IS_TRUE
 #else
 #define TIMECOP_RETURN_TRUE _IS_BOOL
