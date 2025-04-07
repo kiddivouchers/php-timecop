@@ -2,8 +2,8 @@
 Check extension functions reflection data
 --SKIPIF--
 <?php
-$required_version = '5.0';
-$required_version_less_than = '8.0';
+$required_version = '8.0';
+$required_version_less_than = '8.2';
 $required_func = array();
 $required_class = array();
 $required_method = array();
@@ -22,26 +22,30 @@ echo trim(new \ReflectionFunction('timecop_return'));
 Function [ <internal:timecop> function timecop_travel ] {
 
   - Parameters [1] {
-    Parameter #0 [ <required> $timestamp ]
+    Parameter #0 [ <required> DateTimeInterface|int $timestamp ]
   }
+  - Return [ bool ]
 }
 
 Function [ <internal:timecop> function timecop_freeze ] {
 
   - Parameters [1] {
-    Parameter #0 [ <required> $timestamp ]
+    Parameter #0 [ <required> DateTimeInterface|int $timestamp ]
   }
+  - Return [ bool ]
 }
 
 Function [ <internal:timecop> function timecop_scale ] {
 
   - Parameters [1] {
-    Parameter #0 [ <required> $scale ]
+    Parameter #0 [ <required> int $scale ]
   }
+  - Return [ bool ]
 }
 
 Function [ <internal:timecop> function timecop_return ] {
 
   - Parameters [0] {
   }
+  - Return [ bool ]
 }
