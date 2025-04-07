@@ -41,11 +41,6 @@ foreach (['', (object) [], '1234', 4.5, true, false, new \DateTimeImmutable(), n
             $message = str_replace('false given', 'bool given', $message);
         }
 
-        // Workaround exception message not including type in PHP 7 so the same test can be used for both.
-        if (PHP_MAJOR_VERSION === 7) {
-            $message = str_replace('N/A given', var_type($input).' given', $message);
-        }
-
         echo $message, "\n";
     }
 }

@@ -81,22 +81,14 @@ PHP_FUNCTION(timecop_gettimeofday);
 PHP_FUNCTION(timecop_unixtojd);
 PHP_FUNCTION(timecop_date_create);
 PHP_FUNCTION(timecop_date_create_from_format);
-#if PHP_VERSION_ID >= 50500
 PHP_FUNCTION(timecop_date_create_immutable);
 PHP_FUNCTION(timecop_date_create_immutable_from_format);
-#endif
-#if !defined(PHP_VERSION_ID) || PHP_VERSION_ID < 50300
-PHP_FUNCTION(date_timestamp_set);
-PHP_FUNCTION(date_timestamp_get);
-#endif
 
 PHP_METHOD(TimecopDateTime, __construct);
 PHP_METHOD(TimecopOrigDateTime, __construct);
 
-#if PHP_VERSION_ID >= 50500
 PHP_METHOD(TimecopDateTimeImmutable, __construct);
 PHP_METHOD(TimecopOrigDateTimeImmutable, __construct);
-#endif
 
 PHP_METHOD(Timecop, freeze);
 PHP_METHOD(Timecop, travel);
@@ -110,20 +102,12 @@ typedef enum timecop_mode_t {
 ZEND_BEGIN_MODULE_GLOBALS(timecop)
 	long func_override;
 	long sync_request_time;
-#if PHP_VERSION_ID >= 70000
 	zval orig_request_time;
-#else
-	zval *orig_request_time;
-#endif
 	timecop_mode_t timecop_mode;
 	tc_timeval freezed_time;
 	tc_timeval travel_origin;
 	tc_timeval travel_offset;
-#if PHP_VERSION_ID >= 70000
 	zend_long scaling_factor;
-#else
-	long scaling_factor;
-#endif
 	zend_class_entry *ce_DateTimeZone;
 	zend_class_entry *ce_DateTimeInterface;
 	zend_class_entry *ce_DateTime;
@@ -154,11 +138,7 @@ ZEND_END_MODULE_GLOBALS(timecop)
  * Trick for guarding the multi-referenced internal function from function destructor on PHP 7.2.0+
  * See: https://github.com/hnw/php-timecop/issues/29#issuecomment-332171527
  */
-#if PHP_VERSION_ID >= 70200
-#  define FIX_FUNCTION_ARG_INFO_DTOR(zend_func) zend_func->common.arg_info = NULL;
-#else
-#  define FIX_FUNCTION_ARG_INFO_DTOR(zend_func)
-#endif
+#define FIX_FUNCTION_ARG_INFO_DTOR(zend_func) zend_func->common.arg_info = NULL;
 
 struct timecop_override_func_entry {
 	char *orig_func;
@@ -194,19 +174,10 @@ struct timecop_override_class_entry {
 #define call_php_function_with_3_params(function_name, retval, arg1, arg2, arg3) \
 	_call_php_function_with_3_params(function_name, retval, arg1, arg2, arg3 TSRMLS_CC)
 
-#if PHP_VERSION_ID >= 80000
 #define TIMECOP_PARSE_TRAVEL_ARGS(timeval) \
 	if (parse_travel_freeze_arguments(&timeval, INTERNAL_FUNCTION_PARAM_PASSTHRU) > 0) { \
 		RETURN_THROWS(); \
 	}
-#else
-// PHP 7.x needs some extra error handling code to match up with PHP 8.
-#define TIMECOP_PARSE_TRAVEL_ARGS(timeval) \
-	if (parse_travel_freeze_arguments(&timeval, INTERNAL_FUNCTION_PARAM_PASSTHRU) > 0) { \
-		zend_type_error("%s(): Argument #1 ($timestamp) must be of type DateTimeInterface|int, N/A given", get_active_function_name()); \
-		return; \
-	}
-#endif
 
 #define TIMECOP_PARSE_FREEZE_ARGS TIMECOP_PARSE_TRAVEL_ARGS
 
@@ -229,17 +200,9 @@ struct timecop_override_class_entry {
 #define TSRMLS_FETCH()
 #endif
 
-#if PHP_VERSION_ID >= 70000
-#  define TIMECOP_G(v) ZEND_MODULE_GLOBALS_ACCESSOR(timecop, v)
-#  if defined(ZTS) && defined(COMPILE_DL_TIMECOP)
+#define TIMECOP_G(v) ZEND_MODULE_GLOBALS_ACCESSOR(timecop, v)
+#if defined(ZTS) && defined(COMPILE_DL_TIMECOP)
      ZEND_TSRMLS_CACHE_EXTERN();
-#  endif
-#else
-#  ifdef ZTS
-#    define TIMECOP_G(v) TSRMG(timecop_globals_id, zend_timecop_globals *, v)
-#  else
-#    define TIMECOP_G(v) (timecop_globals.v)
-#  endif
 #endif
 
 #endif	/* PHP_TIMECOP_H */
