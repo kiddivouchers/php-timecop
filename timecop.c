@@ -773,7 +773,7 @@ static int get_formatted_mock_time(zval *time, zval *timezone_obj, zval *retval_
  *     return $fixed_usec;
  * }
  */
-static long get_mock_fraction(zval *time, zval *timezone_obj TSRMLS_DC)
+static long get_mock_fraction(zval *time, zval *timezone_obj)
 {
 	zval dt1, dt2, usec1, usec2;
 	zend_long fixed_usec;
@@ -1330,7 +1330,7 @@ static void _timecop_orig_datetime_constructor(INTERNAL_FUNCTION_PARAMETERS, int
 	zval *arg1 = NULL, *arg2 = NULL;
 	zend_class_entry *real_ce;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|zz", &arg1, &arg2) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|zz", &arg1, &arg2) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -1371,7 +1371,7 @@ static void _timecop_datetime_constructor_ex(INTERNAL_FUNCTION_PARAMETERS, zval 
 
 	ZVAL_STRINGL(&orig_time, orig_time_str, orig_time_len);
 #else
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|sO!", &orig_time_str, &orig_time_len, &orig_timezone, TIMECOP_G(ce_DateTimeZone)) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|sO!", &orig_time_str, &orig_time_len, &orig_timezone, TIMECOP_G(ce_DateTimeZone)) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -1390,7 +1390,7 @@ static void _timecop_datetime_constructor_ex(INTERNAL_FUNCTION_PARAMETERS, zval 
 		real_ce = TIMECOP_G(ce_DateTime);
 	}
 
-	if (get_formatted_mock_time(&orig_time, orig_timezone, &fixed_time, &fixed_timezone TSRMLS_CC) == 0) {
+	if (get_formatted_mock_time(&orig_time, orig_timezone, &fixed_time, &fixed_timezone) == 0) {
 		arg1 = &fixed_time;
 		arg2 = &fixed_timezone;
 	} else {

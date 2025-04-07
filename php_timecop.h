@@ -154,25 +154,25 @@ struct timecop_override_class_entry {
 };
 
 #define call_php_method_with_0_params(obj, ce, method_name, retval) \
-	_call_php_method_with_0_params(obj, ce, method_name, retval TSRMLS_CC)
+	_call_php_method_with_0_params(obj, ce, method_name, retval)
 
 #define call_php_method_with_1_params(obj, ce, method_name, retval, arg1)	\
-	_call_php_method_with_1_params(obj, ce, method_name, retval, arg1 TSRMLS_CC)
+	_call_php_method_with_1_params(obj, ce, method_name, retval, arg1)
 
 #define call_php_method_with_2_params(obj, ce, method_name, retval, arg1, arg2) \
-	_call_php_method_with_2_params(obj, ce, method_name, retval, arg1, arg2 TSRMLS_CC)
+	_call_php_method_with_2_params(obj, ce, method_name, retval, arg1, arg2)
 
 #define call_php_function_with_0_params(function_name, retval) \
-	_call_php_method_with_0_params(NULL, NULL, function_name, retval TSRMLS_CC)
+	_call_php_method_with_0_params(NULL, NULL, function_name, retval)
 
 #define call_php_function_with_1_params(function_name, retval, arg1) \
-	_call_php_method_with_1_params(NULL, NULL, function_name, retval, arg1 TSRMLS_CC)
+	_call_php_method_with_1_params(NULL, NULL, function_name, retval, arg1)
 
 #define call_php_function_with_2_params(function_name, retval, arg1, arg2) \
-	_call_php_method_with_2_params(NULL, NULL, function_name, retval, arg1, arg2 TSRMLS_CC)
+	_call_php_method_with_2_params(NULL, NULL, function_name, retval, arg1, arg2)
 
 #define call_php_function_with_3_params(function_name, retval, arg1, arg2, arg3) \
-	_call_php_function_with_3_params(function_name, retval, arg1, arg2, arg3 TSRMLS_CC)
+	_call_php_function_with_3_params(function_name, retval, arg1, arg2, arg3)
 
 #define TIMECOP_PARSE_TRAVEL_ARGS(timeval) \
 	if (parse_travel_freeze_arguments(&timeval, INTERNAL_FUNCTION_PARAM_PASSTHRU) > 0) { \
@@ -181,28 +181,9 @@ struct timecop_override_class_entry {
 
 #define TIMECOP_PARSE_FREEZE_ARGS TIMECOP_PARSE_TRAVEL_ARGS
 
-/* In every utility function you add that needs to use variables
-   in php_timecop_globals, call TSRMLS_FETCH(); after declaring other
-   variables used by that function, or better yet, pass in TSRMLS_CC
-   after the last function argument and declare your utility function
-   with TSRMLS_DC after the last declared argument.  Always refer to
-   the globals in your function as TIMECOP_G(variable).  You are
-   encouraged to rename these macros something shorter, see
-   examples in any other php module directory.
-*/
-
-/* Redeclare macros as no-ops which were removed in PHP 8. */
-#if PHP_VERSION_ID >= 80000
-#define TSRMLS_D void
-#define TSRMLS_DC
-#define TSRMLS_C
-#define TSRMLS_CC
-#define TSRMLS_FETCH()
-#endif
-
 #define TIMECOP_G(v) ZEND_MODULE_GLOBALS_ACCESSOR(timecop, v)
 #if defined(ZTS) && defined(COMPILE_DL_TIMECOP)
-     ZEND_TSRMLS_CACHE_EXTERN();
+    ZEND_TSRMLS_CACHE_EXTERN();
 #endif
 
 #endif	/* PHP_TIMECOP_H */
