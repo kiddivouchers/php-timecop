@@ -93,11 +93,7 @@ static const struct timecop_override_class_entry timecop_override_class_table[] 
 	{NULL, NULL, NULL, NULL}
 };
 
-#if PHP_VERSION_ID >= 80000
-#include "timecop_php8_arginfo.h"
-#else
-#include "timecop_php7_arginfo.h"
-#endif
+#include "timecop_arginfo.h"
 
 /* {{{ timecop_functions[] */
 const zend_function_entry timecop_functions[] = {
@@ -204,11 +200,7 @@ static int get_mock_timeval(tc_timeval *fixed, const tc_timeval *now);
 static inline zend_long mock_timestamp();
 
 zend_always_inline static int parse_travel_freeze_arguments(tc_timeval *ret, INTERNAL_FUNCTION_PARAMETERS);
-#if PHP_VERSION_ID >= 80000
 zend_always_inline static int get_timeval_from_datetime(tc_timeval *tp, zend_object *dt, zend_class_entry *dt_ce);
-#else
-zend_always_inline static int get_timeval_from_datetime(tc_timeval *tp, zval *dt);
-#endif
 static int get_current_time(tc_timeval *now);
 
 static void _timecop_orig_datetime_constructor(INTERNAL_FUNCTION_PARAMETERS, int immutable);
@@ -781,7 +773,7 @@ static int get_formatted_mock_time(zval *time, zval *timezone_obj, zval *retval_
  *     return $fixed_usec;
  * }
  */
-static long get_mock_fraction(zval *time, zval *timezone_obj TSRMLS_DC)
+static long get_mock_fraction(zval *time, zval *timezone_obj)
 {
 	zval dt1, dt2, usec1, usec2;
 	zend_long fixed_usec;
@@ -977,7 +969,6 @@ PHP_FUNCTION(timecop_mktime)
 	zend_long hou = 0, min = 0, sec = 0, mon = 0, day = 0, yea = 0;
 	zend_bool min_is_null = 1, sec_is_null = 1, mon_is_null = 1, day_is_null = 1, yea_is_null = 1;
 
-#if PHP_VERSION_ID >= 80000
 	ZEND_PARSE_PARAMETERS_START(1, 6)
 		Z_PARAM_LONG(hou)
 		Z_PARAM_OPTIONAL
@@ -987,17 +978,6 @@ PHP_FUNCTION(timecop_mktime)
 		Z_PARAM_LONG_OR_NULL(day, day_is_null)
 		Z_PARAM_LONG_OR_NULL(yea, yea_is_null)
 	ZEND_PARSE_PARAMETERS_END();
-#else
-	ZEND_PARSE_PARAMETERS_START(0, 6)
-		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG(hou)
-		Z_PARAM_LONG(min)
-		Z_PARAM_LONG(sec)
-		Z_PARAM_LONG(mon)
-		Z_PARAM_LONG(day)
-		Z_PARAM_LONG(yea)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
-#endif
 
 	TIMECOP_CALL_MKTIME("mktime", "date");
 }
@@ -1010,7 +990,6 @@ PHP_FUNCTION(timecop_gmmktime)
 	zend_long hou = 0, min = 0, sec = 0, mon = 0, day = 0, yea = 0;
 	zend_bool min_is_null = 1, sec_is_null = 1, mon_is_null = 1, day_is_null = 1, yea_is_null = 1;
 
-#if PHP_VERSION_ID >= 80000
 	ZEND_PARSE_PARAMETERS_START(1, 6)
 		Z_PARAM_LONG(hou)
 		Z_PARAM_OPTIONAL
@@ -1020,17 +999,6 @@ PHP_FUNCTION(timecop_gmmktime)
 		Z_PARAM_LONG_OR_NULL(day, day_is_null)
 		Z_PARAM_LONG_OR_NULL(yea, yea_is_null)
 	ZEND_PARSE_PARAMETERS_END();
-#else
-	ZEND_PARSE_PARAMETERS_START(0, 6)
-		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG(hou)
-		Z_PARAM_LONG(min)
-		Z_PARAM_LONG(sec)
-		Z_PARAM_LONG(mon)
-		Z_PARAM_LONG(day)
-		Z_PARAM_LONG(yea)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
-#endif
 
 	TIMECOP_CALL_MKTIME("gmmktime", "gmdate");
 }
@@ -1224,7 +1192,6 @@ zend_always_inline static int parse_travel_freeze_arguments(tc_timeval *ret, INT
 	zend_object *dt_obj;
 	zend_long timestamp;
 
-#if PHP_VERSION_ID >= 80000
 	ZEND_PARSE_PARAMETERS_START(1, 1);
 		Z_PARAM_OBJ_OF_CLASS_OR_LONG(dt_obj, TIMECOP_G(ce_DateTimeInterface), timestamp);
 	ZEND_PARSE_PARAMETERS_END_EX(return 1;);
@@ -1235,28 +1202,10 @@ zend_always_inline static int parse_travel_freeze_arguments(tc_timeval *ret, INT
 		ret->sec = timestamp;
 		ret->usec = 0;
 	}
-#else
-	// Cannot use ZEND_PARSE_PARAMS_THROW as it cannot output required type is "int|DateTime".
-	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "O", &dt_zval, TIMECOP_G(ce_DateTimeInterface)) != FAILURE) {
-		ZEND_PARSE_PARAMETERS_START_EX(ZEND_PARSE_PARAMS_QUIET, 1, 1)
-			Z_PARAM_OBJECT_OF_CLASS(dt_zval, TIMECOP_G(ce_DateTimeInterface));
-		ZEND_PARSE_PARAMETERS_END_EX(return 1;);
-
-		get_timeval_from_datetime(ret, dt_zval);
-	} else {
-		ZEND_PARSE_PARAMETERS_START_EX(ZEND_PARSE_PARAMS_QUIET, 1, 1)
-			Z_PARAM_LONG(timestamp);
-		ZEND_PARSE_PARAMETERS_END_EX(return 1;);
-
-		ret->sec = timestamp;
-		ret->usec = 0;
-	}
-#endif
 
 	return 0;
 }
 
-#if PHP_VERSION_ID >= 80000
 zend_always_inline static int get_timeval_from_datetime(tc_timeval *tp, zend_object *dt, zend_class_entry *dt_ce)
 {
 	zval sec, usec;
@@ -1273,24 +1222,6 @@ zend_always_inline static int get_timeval_from_datetime(tc_timeval *tp, zend_obj
 
 	return 0;
 }
-#else
-zend_always_inline static int get_timeval_from_datetime(tc_timeval *tp, zval *dt)
-{
-	zval sec, usec;
-	zval u_str;
-
-	zend_call_method_with_0_params(dt, Z_OBJCE_P(dt), NULL, "gettimestamp", &sec);
-	ZVAL_STRING(&u_str, "u");
-	zend_call_method_with_1_params(dt, Z_OBJCE_P(dt), NULL, "format", &usec, &u_str);
-	zval_ptr_dtor(&u_str);
-	convert_to_long(&usec);
-
-	tp->sec = Z_LVAL(sec);
-	tp->usec = Z_LVAL(usec);
-
-	return 0;
-}
-#endif
 
 static int get_current_time(tc_timeval *now)
 {
@@ -1399,7 +1330,7 @@ static void _timecop_orig_datetime_constructor(INTERNAL_FUNCTION_PARAMETERS, int
 	zval *arg1 = NULL, *arg2 = NULL;
 	zend_class_entry *real_ce;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|zz", &arg1, &arg2) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|zz", &arg1, &arg2) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -1440,7 +1371,7 @@ static void _timecop_datetime_constructor_ex(INTERNAL_FUNCTION_PARAMETERS, zval 
 
 	ZVAL_STRINGL(&orig_time, orig_time_str, orig_time_len);
 #else
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|sO!", &orig_time_str, &orig_time_len, &orig_timezone, TIMECOP_G(ce_DateTimeZone)) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|sO!", &orig_time_str, &orig_time_len, &orig_timezone, TIMECOP_G(ce_DateTimeZone)) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -1459,7 +1390,7 @@ static void _timecop_datetime_constructor_ex(INTERNAL_FUNCTION_PARAMETERS, zval 
 		real_ce = TIMECOP_G(ce_DateTime);
 	}
 
-	if (get_formatted_mock_time(&orig_time, orig_timezone, &fixed_time, &fixed_timezone TSRMLS_CC) == 0) {
+	if (get_formatted_mock_time(&orig_time, orig_timezone, &fixed_time, &fixed_timezone) == 0) {
 		arg1 = &fixed_time;
 		arg2 = &fixed_timezone;
 	} else {
@@ -1549,19 +1480,9 @@ static void _timecop_date_create_from_format(INTERNAL_FUNCTION_PARAMETERS, int i
 		ZVAL_STRING(&fixed_format, "Y-m-d H:i:s.??????");
 	} else if (memchr(orig_format_str, 'u', orig_format_len)) {
 		// https://bugs.php.net/bug.php?id=78603
-#if PHP_VERSION_ID >= 70300
 		ZVAL_STRING(&fixed_format, "Y-m-d ??:??:??.??????");
-#elif PHP_VERSION_ID >= 70100
-		ZVAL_STRING(&fixed_format, "Y-m-d H:i:s.u");
-#else
-		ZVAL_STRING(&fixed_format, "Y-m-d H:i:s.??????");
-#endif
 	} else {
-#if PHP_VERSION_ID >= 70100
 		ZVAL_STRING(&fixed_format, "Y-m-d H:i:s.u");
-#else
-		ZVAL_STRING(&fixed_format, "Y-m-d H:i:s.??????");
-#endif
 	}
 
 	ZVAL_STRING(&tmp, "%s %s");
@@ -1669,11 +1590,7 @@ static inline zval* _call_php_method_with_2_params(zval *object_pp, zend_class_e
 static inline zval* _call_php_method(zval *object_pp, zend_class_entry *obj_ce, const char *method_name, zval *retval_ptr, int param_count, zval* arg1, zval* arg2)
 {
 	return zend_call_method(
-#if PHP_MAJOR_VERSION >= 8
 		object_pp == NULL ? NULL : Z_OBJ_P(object_pp),
-#else
-		object_pp,
-#endif
 		obj_ce,
 		NULL,
 		method_name,

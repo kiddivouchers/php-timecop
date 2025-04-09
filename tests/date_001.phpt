@@ -26,16 +26,9 @@ var_dump($dt3 instanceof $dt2);
 var_dump($dt1 instanceof $dt3);
 var_dump($dt2 instanceof $dt3);
 echo "===\n";
-if (version_compare(PHP_VERSION, '5.5.0') >= 0) {
-    var_dump($dt1 instanceof DateTimeInterface);
-    var_dump($dt2 instanceof DateTimeInterface);
-    var_dump($dt3 instanceof DateTimeInterface);
-} else {
-    // force pass if PHP < 5.5.0
-    var_dump(true);
-    var_dump(true);
-    var_dump(true);
-}
+var_dump($dt1 instanceof DateTimeInterface);
+var_dump($dt2 instanceof DateTimeInterface);
+var_dump($dt3 instanceof DateTimeInterface);
 echo "===\n";
 var_dump($dt1->format("c") === $freezed_time);
 var_dump($dt2->format("c") === $freezed_time);

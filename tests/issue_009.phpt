@@ -2,8 +2,7 @@
 Check for issue #9 (Issue with using timecop constructor)
 --SKIPIF--
 <?php
-$required_version = "5.3";
-$required_version_less_than = '7.1';
+$required_version = "7.1";
 $required_func = array("timecop_freeze");
 $required_class = array("TimecopDateTime");
 include(__DIR__."/tests-skipcheck.inc.php");
@@ -14,7 +13,7 @@ timecop.func_override=1
 <?php
 class Date extends \DateTime
 {
-    public function __construct($time='now', \DateTimeZone $timezone=null)
+    public function __construct($time='now', ?\DateTimeZone $timezone=null)
     {
         parent::__construct($time, $timezone);
         $this->setTime(0, 0, 0);

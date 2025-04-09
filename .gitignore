@@ -27,6 +27,7 @@ missing
 mkinstalldirs
 modules
 run-tests.php
+*.dep
 
 # Ignore generated tarball
 timecop-*.tgz

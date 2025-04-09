@@ -13,8 +13,6 @@ jobs:
       fail-fast: false
       matrix:
         php-version:
-          - '5.6.40'
-          - '7.4.19'
           - '8.1.25'
           - '8.2.12'
           - '8.3.19'
@@ -46,14 +44,6 @@ jobs:
           echo "::group::Fetch PGP keys"
           # https://www.php.net/gpg-keys.php
           case "${{ matrix.php-version }}" in
-            5.6.*)
-              gpg_fetch_key FE857D9A90D90EC1
-              gpg_fetch_key C2BF0BC433CFC8B3
-            ;;
-            7.4.*)
-              gpg_fetch_key 5A52880781F755608BF815FC910DEB46F53EA312
-              gpg_fetch_key 42670A7FE4D0441C8E4632349E4FDC074A4EF02D
-            ;;
             8.1.*)
               gpg_fetch_key 528995BFEDFBA7191D46839EF9BA0ADA31CBD89E
               gpg_fetch_key 39B641343D8C104B2B146DC3F9C39DC0B9698544

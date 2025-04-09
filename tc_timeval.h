@@ -25,28 +25,22 @@ SOFTWARE.
 #ifndef TC_TIMEVAL_H
 #define TC_TIMEVAL_H
 
+#include <Zend/zend_types.h>
+#include <stdint.h>
+
 #ifndef USEC_PER_SEC
 #  define USEC_PER_SEC 1000000
 #endif
 
 typedef struct _tc_timeval {
-#if PHP_MAJOR_VERSION >= 7
 	zend_long sec;
 	zend_long usec;
-#else
-	long sec;
-	long usec;
-#endif
 } tc_timeval;
 
 
 int tc_timeval_add(tc_timeval *ret, const tc_timeval *arg1, const tc_timeval *arg2);
 int tc_timeval_sub(tc_timeval *ret, const tc_timeval *arg1, const tc_timeval *arg2);
-#if PHP_MAJOR_VERSION >= 7
 int tc_timeval_mul(tc_timeval *ret, const tc_timeval *arg1, const zend_long arg2);
-#else
-int tc_timeval_mul(tc_timeval *ret, const tc_timeval *arg1, const long arg2);
-#endif
 
 #endif	/* TC_TIMEVAL_H */
 
