@@ -114,7 +114,7 @@ jobs:
           sudo make install
         working-directory: php-${{ matrix.php-version }}
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           path: timecop
       - name: Test Timecop
