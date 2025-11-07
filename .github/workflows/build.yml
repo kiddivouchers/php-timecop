@@ -20,6 +20,7 @@ jobs:
           - '8.2'
           - '8.3'
           - '8.4'
+          - '8.5'
         php-zts:
           - nts
           - ts
@@ -27,6 +28,8 @@ jobs:
           - php-version: '8.3'
             php-zts: 'ts'
           - php-version: '8.4'
+            php-zts: 'ts'
+          - php-version: '8.5'
             php-zts: 'ts'
     steps:
       - name: Setup PHP
