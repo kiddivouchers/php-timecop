@@ -28,7 +28,7 @@ extension=timecop.so
 ## SYSTEM REQUIREMENTS
 
 - OS: Linux, macOS
-- PHP: 8.0.x - 8.4.x
+- PHP: 8.0.x - 8.5.x
 - SAPI: Apache, CLI
   - Other SAPIs are not tested, but there is no SAPI-dependent code.
 - non-ZTS(recommended), ZTS
@@ -105,6 +105,9 @@ var_dump((new DateTime())->format("c")); // string(25) "2017-01-01T00:00:05+00:0
 ```
 
 ## CHANGELOG
+
+### version 1.8.0rc1, 2025/11/07
+- Support PHP 8.5
 
 ### version 1.7.0, 2025/03/21
 - Support PHP 8.4

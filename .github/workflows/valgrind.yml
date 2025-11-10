@@ -17,6 +17,7 @@ jobs:
           - '8.2.12'
           - '8.3.19'
           - '8.4.5'
+          - '8.5.0RC4'
         os:
           - 'ubuntu-22.04'
     steps:
@@ -64,6 +65,11 @@ jobs:
               gpg_fetch_key 9D7F99A0CB8F05C8A6958D6256A97AF7600A39A6
               gpg_fetch_key 0616E93D95AF471243E26761770426E17EBBB3DD
             ;;
+            8.5.*)
+              gpg_fetch_key 1198C0117593497A5EC5C199286AF1F9897469DC
+              gpg_fetch_key 49D9AF6BC72A80D6691719C8AA23F5BE9C7097D4
+              gpg_fetch_key D95C03BC702BE9515344AE3374E44BC9067701A5
+            ;;
             *)
               echo "::warning::No keys imported!"
             ;;
@@ -71,8 +77,17 @@ jobs:
           echo "::endgroup::"
 
           echo "::group::Download PHP"
-          wget "https://www.php.net/distributions/php-${{ matrix.php-version }}.tar.xz"
-          wget "https://www.php.net/distributions/php-${{ matrix.php-version }}.tar.xz.asc"
+          case "${{ matrix.php-version }}" in
+            8.5.0RC*)
+              base_url="https://downloads.php.net/~edorian"
+            ;;
+            *)
+              base_url="https://www.php.net/distributions"
+            ;;
+          esac
+
+          wget "${base_url}/php-${{ matrix.php-version }}.tar.xz"
+          wget "${base_url}/php-${{ matrix.php-version }}.tar.xz.asc"
           echo "::endgroup::"
 
           gpg --verify "php-${{ matrix.php-version }}.tar.xz.asc"
