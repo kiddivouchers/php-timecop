@@ -46,7 +46,7 @@ jobs:
         run: |
           echo "PHP_API=$(php-config --phpapi)" >> $GITHUB_ENV
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: Build
         run: |
           phpize
