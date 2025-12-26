@@ -694,6 +694,7 @@ static int get_formatted_mock_time(zval *time, zval *timezone_obj, zval *retval_
 	zval now_timestamp, str_now;
 	tc_timeval now;
 	zend_long fixed_usec;
+	int timezone_changed = 0;
 
 	if (TIMECOP_G(timecop_mode) == TIMECOP_MODE_REALTIME) {
 		ZVAL_FALSE(retval_time);
@@ -710,10 +711,29 @@ static int get_formatted_mock_time(zval *time, zval *timezone_obj, zval *retval_
 
 	get_mock_timeval(&now, NULL);
 
-	// @todo Restore removed timezone handling code? https://github.com/kiddivouchers/php-timecop/pull/6
+	/* Temporarily set default timezone to the provided timezone for strtotime */
+	ZVAL_NULL(&orig_zonename);
+	if (timezone_obj != NULL && Z_TYPE_P(timezone_obj) != IS_NULL) {
+		zval zonename;
+		call_php_method_with_0_params(timezone_obj, TIMECOP_G(ce_DateTimeZone), "getname", &zonename);
+		/* Only change timezone for named timezones, not offset-based ones like "+00:00" */
+		if (Z_TYPE(zonename) == IS_STRING && Z_STRLEN(zonename) > 0 &&
+			Z_STRVAL(zonename)[0] != '+' && Z_STRVAL(zonename)[0] != '-') {
+			call_php_function_with_0_params("date_default_timezone_get", &orig_zonename);
+			call_php_function_with_1_params("date_default_timezone_set", NULL, &zonename);
+			timezone_changed = 1;
+		}
+		zval_ptr_dtor(&zonename);
+	}
 
 	ZVAL_LONG(&now_timestamp, now.sec);
 	call_php_function_with_2_params(ORIG_FUNC_NAME("strtotime"), &fixed_sec, time, &now_timestamp);
+
+	/* Restore original default timezone */
+	if (timezone_changed && Z_TYPE(orig_zonename) == IS_STRING) {
+		call_php_function_with_1_params("date_default_timezone_set", NULL, &orig_zonename);
+	}
+	zval_ptr_dtor(&orig_zonename);
 
 	if (Z_TYPE(fixed_sec) == IS_FALSE) {
 		ZVAL_FALSE(retval_time);
