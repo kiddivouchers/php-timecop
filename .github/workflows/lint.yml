@@ -21,4 +21,8 @@ jobs:
             echo "timecop_arginfo.h needs regenerating."
             echo
             echo "make -B timecop_arginfo.h"
+
+            exit 1
           fi
+
+          exit 0
