@@ -9,7 +9,7 @@ on:
 jobs:
   build:
     name: PHP ${{ matrix.php-version }} (ZTS ${{ matrix.php-zts }})
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     strategy:
       fail-fast: false
@@ -69,7 +69,7 @@ jobs:
           if-no-files-found: error
   package:
     name: Package for download
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     needs: build
     steps:

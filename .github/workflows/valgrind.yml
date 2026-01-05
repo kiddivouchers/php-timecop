@@ -19,7 +19,7 @@ jobs:
           - '8.4.16'
           - '8.5.1'
         os:
-          - 'ubuntu-22.04'
+          - 'ubuntu-24.04'
     steps:
       - name: Install valgrind
         run: |
