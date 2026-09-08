@@ -217,15 +217,15 @@ static inline void _call_php_function_with_params(const char *function_name, zva
 
 static const zend_module_dep timecop_module_deps[] = {
 	ZEND_MOD_REQUIRED("Date")
-    ZEND_MOD_END
+	ZEND_MOD_END
 };
 
 /* {{{ timecop_module_entry
  */
 zend_module_entry timecop_module_entry = {
-    STANDARD_MODULE_HEADER_EX,
-    NULL,
-    timecop_module_deps,
+	STANDARD_MODULE_HEADER_EX,
+	NULL,
+	timecop_module_deps,
 	"timecop",
 	timecop_functions,
 	PHP_MINIT(timecop),
@@ -241,19 +241,19 @@ zend_module_entry timecop_module_entry = {
 /* }}} */
 
 #ifdef COMPILE_DL_TIMECOP
-#  ifdef ZTS
-   ZEND_TSRMLS_CACHE_DEFINE();
-#  endif
+#   ifdef ZTS
+	ZEND_TSRMLS_CACHE_DEFINE();
+#   endif
 ZEND_GET_MODULE(timecop)
 #endif
 
 /* {{{ PHP_INI
  */
 PHP_INI_BEGIN()
-    STD_PHP_INI_ENTRY("timecop.func_override", "1",
-    PHP_INI_SYSTEM, OnUpdateLong, func_override, zend_timecop_globals, timecop_globals)
-    STD_PHP_INI_ENTRY("timecop.sync_request_time", "1",
-    PHP_INI_SYSTEM, OnUpdateLong, sync_request_time, zend_timecop_globals, timecop_globals)
+	STD_PHP_INI_ENTRY("timecop.func_override", "1",
+	PHP_INI_SYSTEM, OnUpdateLong, func_override, zend_timecop_globals, timecop_globals)
+	STD_PHP_INI_ENTRY("timecop.sync_request_time", "1",
+	PHP_INI_SYSTEM, OnUpdateLong, sync_request_time, zend_timecop_globals, timecop_globals)
 PHP_INI_END()
 /* }}} */
 
