@@ -23,6 +23,7 @@ jobs:
     steps:
       - name: Install valgrind
         run: |
+          sudo apt-get update
           sudo apt-get install -y valgrind
       - name: Cache PHP
         id: cache-php
