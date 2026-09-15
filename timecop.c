@@ -31,6 +31,8 @@ SOFTWARE.
 #include "ext/standard/info.h"
 
 #include "php_timecop.h"
+#include "main/SAPI.h"
+#include "Zend/zend_ini.h"
 
 #ifdef ZFS
 #include "TSRM.h"
@@ -214,18 +216,19 @@ static inline zval* _call_php_method_with_2_params(zval *object_pp, zend_class_e
 static inline zval* _call_php_method(zval *object_pp, zend_class_entry *obj_ce, const char *method_name, zval *retval_ptr, int param_count, zval* arg1, zval* arg2);
 static void _call_php_function_with_3_params(const char *function_name, zval *retval_ptr, zval *arg1, zval *arg2, zval *arg3);
 static inline void _call_php_function_with_params(const char *function_name, zval *retval_ptr, uint32_t param_count, zval params[]);
+static zend_bool is_opcache_preload_configured(void);
 
 static const zend_module_dep timecop_module_deps[] = {
 	ZEND_MOD_REQUIRED("Date")
-    ZEND_MOD_END
+	ZEND_MOD_END
 };
 
 /* {{{ timecop_module_entry
  */
 zend_module_entry timecop_module_entry = {
-    STANDARD_MODULE_HEADER_EX,
-    NULL,
-    timecop_module_deps,
+	STANDARD_MODULE_HEADER_EX,
+	NULL,
+	timecop_module_deps,
 	"timecop",
 	timecop_functions,
 	PHP_MINIT(timecop),
@@ -241,19 +244,19 @@ zend_module_entry timecop_module_entry = {
 /* }}} */
 
 #ifdef COMPILE_DL_TIMECOP
-#  ifdef ZTS
-   ZEND_TSRMLS_CACHE_DEFINE();
-#  endif
+#   ifdef ZTS
+	ZEND_TSRMLS_CACHE_DEFINE();
+#   endif
 ZEND_GET_MODULE(timecop)
 #endif
 
 /* {{{ PHP_INI
  */
 PHP_INI_BEGIN()
-    STD_PHP_INI_ENTRY("timecop.func_override", "1",
-    PHP_INI_SYSTEM, OnUpdateLong, func_override, zend_timecop_globals, timecop_globals)
-    STD_PHP_INI_ENTRY("timecop.sync_request_time", "1",
-    PHP_INI_SYSTEM, OnUpdateLong, sync_request_time, zend_timecop_globals, timecop_globals)
+	STD_PHP_INI_ENTRY("timecop.func_override", "1",
+	PHP_INI_SYSTEM, OnUpdateLong, func_override, zend_timecop_globals, timecop_globals)
+	STD_PHP_INI_ENTRY("timecop.sync_request_time", "1",
+	PHP_INI_SYSTEM, OnUpdateLong, sync_request_time, zend_timecop_globals, timecop_globals)
 PHP_INI_END()
 /* }}} */
 
@@ -285,6 +288,20 @@ PHP_RINIT_FUNCTION(timecop)
 #if defined(COMPILE_DL_TIMECOP) && defined(ZTS)
 	ZEND_TSRMLS_CACHE_UPDATE();
 #endif
+	ZEND_TLS int warned = 0;
+
+	if (TIMECOP_G(func_override) && is_opcache_preload_configured()) {
+		if (warned < 1) {
+			warned = 1;
+			php_error_docref(
+				"https://github.com/kiddivouchers/php-timecop/issues/53",
+				E_CORE_WARNING,
+				"Timecop function overrides disabled when opcache is preloaded."
+			);
+		}
+
+		TIMECOP_G(func_override) = 0;
+	}
 
 	if (TIMECOP_G(func_override)) {
 		if (SUCCESS != timecop_func_override() ||
@@ -1646,6 +1663,30 @@ static inline void _call_php_function_with_params(const char *function_name, zva
 	call_user_function(EG(function_table), NULL, &callable, retval_ptr, param_count, params);
 
 	zval_ptr_dtor(&callable);
+}
+
+/**
+ * Checks if OPcache is enabled and opcache.preload is set to a non-empty file path.
+ */
+static zend_bool is_opcache_preload_configured(void)
+{
+	zend_long enabled;
+	zend_long is_cli = strcmp(sapi_module.name, "cli") == 0
+		|| strcmp(sapi_module.name, "phpdbg") == 0;
+
+	if (is_cli) {
+		enabled = zend_ini_long("opcache.enable_cli", sizeof("opcache.enable_cli") - 1, 0);
+	} else {
+		enabled = zend_ini_long("opcache.enable", sizeof("opcache.enable") - 1, 0);
+	}
+
+	if (!enabled) {
+		return false;
+	}
+
+	char *preload_script = zend_ini_string("opcache.preload", sizeof("opcache.preload") - 1, 0);
+
+	return (preload_script != NULL && preload_script[0] != '\0');
 }
 
 /*
