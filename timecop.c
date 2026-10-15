@@ -1462,6 +1462,7 @@ static void _timecop_date_create_from_format(INTERNAL_FUNCTION_PARAMETERS, int i
 	tc_timeval now;
 	char buf[64];
 	const char *real_func;
+	zend_class_entry *called_scope = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|O!", &orig_format_str, &orig_format_len, &orig_time_str, &orig_time_len, &orig_timezone, TIMECOP_G(ce_DateTimeZone)) == FAILURE) {
 		RETURN_FALSE;
@@ -1469,6 +1470,47 @@ static void _timecop_date_create_from_format(INTERNAL_FUNCTION_PARAMETERS, int i
 
 	ZVAL_STRINGL(&orig_format, orig_format_str, orig_format_len);
 	ZVAL_STRINGL(&orig_time, orig_time_str, orig_time_len);
+
+	if (execute_data->func->common.scope != NULL) {
+		called_scope = zend_get_called_scope(execute_data);
+	}
+
+	if (called_scope != NULL &&
+		(memchr(orig_format_str, '!', orig_format_len) ||
+		 memchr(orig_format_str, '|', orig_format_len))) {
+		zend_class_entry *date_ce = immutable ? TIMECOP_G(ce_DateTimeImmutable) : TIMECOP_G(ce_DateTime);
+		const char *save_method = ORIG_FUNC_NAME("createfromformat");
+		zend_function *orig_method = zend_hash_str_find_ptr(&date_ce->function_table, save_method, strlen(save_method));
+		zend_fcall_info fci = empty_fcall_info;
+		zend_fcall_info_cache fcc = empty_fcall_info_cache;
+		zval params[3];
+		uint32_t param_count = 2;
+
+		ZVAL_COPY(&params[0], &orig_format);
+		ZVAL_COPY(&params[1], &orig_time);
+		if (orig_timezone != NULL) {
+			ZVAL_COPY(&params[2], orig_timezone);
+			param_count = 3;
+		}
+
+		fci.size = sizeof(fci);
+		fci.retval = return_value;
+		fci.params = params;
+		fci.param_count = param_count;
+		fcc.function_handler = orig_method;
+		fcc.calling_scope = orig_method->common.scope;
+		fcc.called_scope = called_scope;
+		zend_call_function(&fci, &fcc);
+
+		zval_ptr_dtor(&params[0]);
+		zval_ptr_dtor(&params[1]);
+		if (param_count == 3) {
+			zval_ptr_dtor(&params[2]);
+		}
+		zval_ptr_dtor(&orig_format);
+		zval_ptr_dtor(&orig_time);
+		return;
+	}
 
 	call_php_function_with_3_params(ORIG_FUNC_NAME("date_create_from_format"), &dt, &orig_format, &orig_time, orig_timezone);
 	if (Z_TYPE(dt) == IS_FALSE) {
@@ -1532,7 +1574,39 @@ static void _timecop_date_create_from_format(INTERNAL_FUNCTION_PARAMETERS, int i
 	} else {
 		real_func = ORIG_FUNC_NAME("date_create_from_format");
 	}
-	call_php_function_with_3_params(real_func, return_value, &new_format, &new_time, orig_timezone);
+	if (called_scope != NULL) {
+		zend_class_entry *date_ce = immutable ? TIMECOP_G(ce_DateTimeImmutable) : TIMECOP_G(ce_DateTime);
+		const char *save_method = ORIG_FUNC_NAME("createfromformat");
+		zend_function *orig_method = zend_hash_str_find_ptr(&date_ce->function_table, save_method, strlen(save_method));
+		zend_fcall_info fci = empty_fcall_info;
+		zend_fcall_info_cache fcc = empty_fcall_info_cache;
+		zval params[3];
+		uint32_t param_count = 2;
+
+		ZVAL_COPY(&params[0], &new_format);
+		ZVAL_COPY(&params[1], &new_time);
+		if (orig_timezone != NULL) {
+			ZVAL_COPY(&params[2], orig_timezone);
+			param_count = 3;
+		}
+
+		fci.size = sizeof(fci);
+		fci.retval = return_value;
+		fci.params = params;
+		fci.param_count = param_count;
+		fcc.function_handler = orig_method;
+		fcc.calling_scope = orig_method->common.scope;
+		fcc.called_scope = called_scope;
+		zend_call_function(&fci, &fcc);
+
+		zval_ptr_dtor(&params[0]);
+		zval_ptr_dtor(&params[1]);
+		if (param_count == 3) {
+			zval_ptr_dtor(&params[2]);
+		}
+	} else {
+		call_php_function_with_3_params(real_func, return_value, &new_format, &new_time, orig_timezone);
+	}
 
 	zval_ptr_dtor(&dt);
 	zval_ptr_dtor(&orig_format);
