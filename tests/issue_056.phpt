@@ -27,6 +27,8 @@ final class MyMutableDate extends \DateTime
 
 var_dump(MyMutableDate::createFromFormat('!Y', '2020'));
 var_dump(MyImmutableDate::createFromFormat('!Y', '2020'));
+var_dump(get_class(MyMutableDate::createFromFormat('Y-m-d', '2020-01-01', new \DateTimeZone('GMT'))));
+var_dump(get_class(MyImmutableDate::createFromFormat('Y-m-d', '2020-01-01', new \DateTimeZone('GMT'))));
 --EXPECT--
 object(MyMutableDate)#1 (3) {
   ["date"]=>
@@ -44,3 +46,5 @@ object(MyImmutableDate)#1 (3) {
   ["timezone"]=>
   string(3) "GMT"
 }
+string(13) "MyMutableDate"
+string(15) "MyImmutableDate"
